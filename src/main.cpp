@@ -34,7 +34,7 @@ GLint uniView;
 GLint uniModel;
 GLint uniWave;
 
-int verticesPerSide = 30;
+int verticesPerSide = 50;
 
 float totalTime = 0;
 
@@ -56,6 +56,7 @@ void generateOceanMesh() {
 			int i = (r * verticesPerSide * 3) + (c * 3); 
 
 			//calc position
+			//float x = (r * ((meshSize * 3) / verticesPerSide)) - ((meshSize * 3) / 2.0f);
 			float x = (r * (meshSize / verticesPerSide)) - (meshSize / 2.0f);
 			float y = 0.0f;
 			float z = (c * (meshSize / verticesPerSide)) - (meshSize / 2.0f);
@@ -124,12 +125,13 @@ void update(float dt) {
 
 	totalTime += dt;
 
-	
+	/*
 	camera.view = glm::rotate(
 			camera.view,
 			-1.0f * 0.05f * dt * glm::radians(180.0f),
 			glm::vec3(0.0f, 1.0f, 0.0f)
 		);
+	*/
 
 	glBindVertexArray(vao);
 
@@ -139,6 +141,7 @@ void update(float dt) {
 
 	//update model transform
 	glm::mat4 model;
+	model = glm::scale(model, glm::vec3(3,1,1));
 	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
 
 	glUniform1f(uniWave, totalTime * 0.2f);
@@ -169,7 +172,7 @@ void loop() {
 		}
 
 		// Clear the screen to black
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClearColor(0.3f, 0.7f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //depth buffer needs to be cleared for depth testing
 
 		//update & draw everything

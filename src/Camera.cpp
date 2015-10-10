@@ -7,7 +7,8 @@ Camera::Camera() {
 	
 	//set up camera view
 	view = glm::lookAt(
-	    glm::vec3(4.0f, 1.0f, 2.0f),
+	    glm::vec3(0.0f, 2.0f, -2.0f),
+	    //glm::vec3(2.0f, 2.0f, -4.0f),
 	    glm::vec3(0.0f, 0.0f, 0.0f),
 	    glm::vec3(0.0f, 1.0f, 0.0f)
 	);	
