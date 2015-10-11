@@ -33,6 +33,10 @@ GLint uniProj;
 GLint uniView;
 GLint uniModel;
 GLint uniWave;
+GLint uniBigWave;
+
+glm::vec3 wavePos = glm::vec3(0,1,5);
+glm::vec3 waveSpeed = glm::vec3(0,0,-1);
 
 int verticesPerSide = 50;
 
@@ -119,6 +123,7 @@ void ready() {
 	uniView = glGetUniformLocation(shader.program, "view");
 	uniModel = glGetUniformLocation(shader.program, "model");
 	uniWave = glGetUniformLocation(shader.program, "waveOffset");
+	uniBigWave = glGetUniformLocation(shader.program, "bigWavePos");
 }
 
 void update(float dt) {
@@ -141,10 +146,13 @@ void update(float dt) {
 
 	//update model transform
 	glm::mat4 model;
-	model = glm::scale(model, glm::vec3(3,1,1));
+	model = glm::scale(model, glm::vec3(2.5,1,1));
 	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
 
 	glUniform1f(uniWave, totalTime * 0.2f);
+
+	wavePos += waveSpeed * dt;
+	glUniform3fv(uniBigWave, 1, glm::value_ptr(wavePos));
 	
 	//draw
 	glDrawElements(GL_TRIANGLES, (verticesPerSide - 1) * (verticesPerSide - 1) * 2 * 3, GL_UNSIGNED_INT, 0);
