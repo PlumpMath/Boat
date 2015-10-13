@@ -70,5 +70,6 @@ glMeshData setMesh(GLfloat vertices[], int vertCount, GLuint elements[], int ele
 glMeshData setMesh(GLuint vertices[], int vertCount);
 void destroyMesh(glMeshData mesh);
 
-glModelData buildModel(const char* vertexShaderPath, const char* fragmentShaderPath, GLfloat vertices[], int vertCount, GLuint elements[], int elemCount);
+glModelData buildModel(const char* vertexShaderPath, const char* fragmentShaderPath, GLfloat vertices[], int vertCount, GLuint elements[], int elemCount, vector<glAttribF> attribArray);
 void destroyModel(glModelData model);
+void drawModel(glModelData model);

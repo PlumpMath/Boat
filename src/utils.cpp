@@ -186,11 +186,12 @@ void destroyMesh(glMeshData mesh) {
 	if (mesh.hasElements) glDeleteBuffers(1, &(mesh.ebo));
 }
 
-glModelData buildModel(const char* vertexShaderPath, const char* fragmentShaderPath, GLfloat vertices[], int vertCount, GLuint elements[], int elemCount) {
+glModelData buildModel(const char* vertexShaderPath, const char* fragmentShaderPath, GLfloat vertices[], int vertCount, GLuint elements[], int elemCount, vector<glAttribF> attribArray) {
 	//init and bind Vertex Array Object
 	GLuint vao;
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
+	std::cout << "VAO " << vao << std::endl;
 
 	glModelData model = {
 		vao,
@@ -202,6 +203,10 @@ glModelData buildModel(const char* vertexShaderPath, const char* fragmentShaderP
 	//should I put this in the shader wrapper too?
 	glUseProgram(model.shader.program);
 
+	initAttribs(attribArray, model.shader.program);
+
+	glBindVertexArray(0);
+
 	return model;
 }
 
@@ -209,4 +214,10 @@ void destroyModel(glModelData model) {
 	destroyShaderProgram(model.shader);
 	destroyMesh(model.mesh);
 	glDeleteVertexArrays(1, &(model.vao));
+}
+
+void drawModel(glModelData model) {
+	glBindVertexArray(model.vao);
+	glUseProgram(model.shader.program);
+	glDrawElements(GL_TRIANGLES, model.triCount, GL_UNSIGNED_INT, 0);
 }

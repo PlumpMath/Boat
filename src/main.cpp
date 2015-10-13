@@ -18,7 +18,9 @@
 
 //my stuff
 #include "utils.h"
+#include "globals.h"
 #include "Camera.h"
+#include "Boat.h"
 
 glApp app;
 
@@ -38,10 +40,11 @@ GLint uniBigWave;
 glm::vec3 wavePos = glm::vec3(0,1,5);
 glm::vec3 waveSpeed = glm::vec3(0,0,-1);
 
-int verticesPerSide = 50;
-
 float totalTime = 0;
 
+Boat boat;
+
+int verticesPerSide = 50;
 void generateOceanMesh() {
 	
 	float meshSize = 5.0f;
@@ -109,6 +112,7 @@ void ready() {
 
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
+	std::cout << "VAO " << vao << std::endl;
 
 	shader = readAndConstructShaderProgram("ocean_vert.glsl", "ocean_frag.glsl");
 	glUseProgram(shader.program);
@@ -124,6 +128,10 @@ void ready() {
 	uniModel = glGetUniformLocation(shader.program, "model");
 	uniWave = glGetUniformLocation(shader.program, "waveOffset");
 	uniBigWave = glGetUniformLocation(shader.program, "bigWavePos");
+
+	glBindVertexArray(0);
+
+	Boat::InitModel();
 }
 
 void update(float dt) {
@@ -138,7 +146,11 @@ void update(float dt) {
 		);
 	*/
 
+	boat.update(dt);
+	boat.draw();
+
 	glBindVertexArray(vao);
+	glUseProgram(shader.program);
 
 	//update camera
 	glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(camera.view));
@@ -159,7 +171,7 @@ void update(float dt) {
 }
 
 void on_quit() {
-
+	Boat::DestroyModel();
 }
 
 //main game loop boilerplate

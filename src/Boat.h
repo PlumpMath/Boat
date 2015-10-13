@@ -1,5 +1,8 @@
 #pragma once
 
+#include "utils.h"
+#include "globals.h"
+
 class Boat {
 
 	public:
@@ -12,5 +15,9 @@ class Boat {
 
 	private:
 		static glModelData model;
+		static GLint uniProj;
+		static GLint uniView;
+		static GLint uniModel;
 
-}
+		glm::mat4 transform;
+};

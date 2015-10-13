@@ -1,6 +1,7 @@
 #version 150
 
 flat in vec3 triColor;
+//in vec3 triColor;
 out vec4 outColor;
 
 void main() {
