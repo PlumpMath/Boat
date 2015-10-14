@@ -31,6 +31,7 @@ class Boat {
 		glm::vec3 scale;
 
 		float speed;
+		glm::vec3 velocity;
 		bool movingLeft, movingRight, movingForward, movingBack;
 
 		float totalTime;

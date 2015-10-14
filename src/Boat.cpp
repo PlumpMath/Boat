@@ -1,6 +1,7 @@
 #include "Boat.h"
 
 #include <iostream>
+#include <algorithm> 
 
 //init static variables (for reasons I still don't fully understand)
 glModelData Boat::model;
@@ -192,18 +193,41 @@ void Boat::update(float dt) {
 
 	//move
 	if (movingLeft) {
-		position.x += speed * dt;
+		velocity.x += speed * 0.3 * dt;
+		velocity.x = std::min(velocity.x, speed);
 	}
 	else if (movingRight) {
-		position.x += -speed * dt;
+		velocity.x -= speed * 0.3 * dt;
+		velocity.x = std::max(velocity.x, -speed);
+	}
+	else { //friction
+		if (velocity.x != 0) {
+			float sign = (velocity.x / std::abs(velocity.x));
+			float newX = velocity.x - (speed * 0.3 * sign * dt);
+			if ( (newX < 0) != (velocity.x < 0) ) newX = 0;
+			velocity.x = newX;
+		}
 	}
 
 	if (movingForward) {
-		position.z += speed * dt;
+		velocity.z += speed * 0.3 * dt;
+		velocity.z = std::min(velocity.z, speed);
 	}
 	else if (movingBack) {
-		position.z += -speed * 0.5 * dt;
+		velocity.z -= speed * 0.3 * dt;
+		velocity.z = std::max(velocity.z, -speed * 0.5f);
 	}
+	else { //friction
+		if (velocity.z != 0) {
+			float sign = (velocity.z / std::abs(velocity.z));
+			float newZ = velocity.z - (speed * 0.3 * sign * dt);
+			if ( (newZ < 0) != (velocity.z < 0) ) newZ = 0;
+			velocity.z = newZ;
+		}
+	}
+
+	//velocity
+	position += (velocity * dt);
 
 	//the current
 	position.z += -2 * dt;
