@@ -1,10 +1,13 @@
 #include "Boat.h"
 
+#include <iostream>
+
 //init static variables (for reasons I still don't fully understand)
 glModelData Boat::model;
 GLint Boat::uniProj;
 GLint Boat::uniView;
 GLint Boat::uniModel;
+GLint Boat::uniWave;
 
 //static functions
 void Boat::InitModel() {
@@ -159,6 +162,7 @@ void Boat::InitModel() {
 	Boat::uniProj = glGetUniformLocation(Boat::model.shader.program, "proj");
 	Boat::uniView = glGetUniformLocation(Boat::model.shader.program, "view");
 	Boat::uniModel = glGetUniformLocation(Boat::model.shader.program, "model");
+	Boat::uniWave = glGetUniformLocation(Boat::model.shader.program, "waveOffset");
 }
 
 void Boat::DestroyModel() {
@@ -167,14 +171,118 @@ void Boat::DestroyModel() {
 
 //methods
 Boat::Boat() {
-	transform = glm::scale(transform, glm::vec3(0.1, 0.1, 0.1));
-	transform = glm::translate(transform, glm::vec3(0, 1, 0));
+	//transform = glm::scale(transform, glm::vec3(0.08, 0.08, 0.08));
+	scale = glm::vec3(0.08, 0.08, 0.08);
+	speed = 10;
+	//transform = glm::translate(transform, glm::vec3(0, 1, 0));
 }
 
 void Boat::update(float dt) {
-	transform = glm::rotate(transform, 
-		-1.0f * 0.5f * dt * glm::radians(180.0f), 
-		glm::vec3(0.0f, 1.0f, 0.0f));
+	totalTime += dt;
+
+	//rotation
+	goalRotTimer += dt;
+	float timerLength = 1;
+	if (goalRotTimer > timerLength) {
+		rotation = goalRot;
+	}
+	else {
+		rotation = startRot + ((goalRot - startRot) * (goalRotTimer / timerLength));
+	}
+
+	//move
+	if (movingLeft) {
+		position.x += speed * dt;
+	}
+	else if (movingRight) {
+		position.x += -speed * dt;
+	}
+
+	if (movingForward) {
+		position.z += speed * dt;
+	}
+	else if (movingBack) {
+		position.z += -speed * 0.5 * dt;
+	}
+
+	//the current
+	position.z += -2 * dt;
+
+	//bounds
+	//std::cout << position.x << " " << position.z << std::endl;
+	if (position.x > 72) position.x = 72;
+	if (position.x < -72) position.x = -72;
+	if (position.z > 16) position.z = 16;
+	if (position.z < -12) position.z = -12;
+
+	//update transform
+	transform = glm::mat4(); //return to identity matrix
+	transform = glm::scale(transform, scale); //scale
+	transform = glm::translate(transform, position); //position
+	//rotation
+	transform = glm::rotate(transform, glm::radians(rotation.x), glm::vec3(1,0,0));
+	transform = glm::rotate(transform, glm::radians(rotation.y), glm::vec3(0,1,0));
+	transform = glm::rotate(transform, glm::radians(rotation.z), glm::vec3(0,0,1));
+}
+
+void Boat::onkeydown(string keyname) {
+	if (keyname == "Left" && !movingLeft) {
+		movingLeft = true;
+		movingRight = false;
+
+		//start leftward rotation
+		startRot = rotation;
+		goalRot.y = 15;
+		goalRot.z = -10;
+		goalRotTimer = 0;
+	}
+	else if (keyname == "Right" && !movingRight) {
+		movingRight = true;
+		movingLeft = false;
+
+		//start rightward rotation
+		startRot = rotation;
+		goalRot.y = -15;
+		goalRot.z = 10;
+		goalRotTimer = 0;
+	}
+
+	if (keyname == "Up" && !movingForward) {
+		movingForward = true;
+		movingBack = false;
+	}
+	else if (keyname == "Down" && !movingBack) {
+		movingBack = true;
+		movingForward = false;
+	}
+}
+
+void Boat::onkeyup(string keyname) {
+	if (keyname == "Left" && movingLeft) {
+		movingLeft = false;
+
+		//start recentering rotation
+		startRot = rotation;
+		goalRot.y = 0;
+		goalRot.z = 0;
+		goalRotTimer = 0;
+	}
+	else if (keyname == "Right" && movingRight) {
+		movingRight = false;
+
+		//start recentering rotation
+		startRot = rotation;
+		goalRot.y = 0;
+		goalRot.z = 0;
+		goalRotTimer = 0;
+	}
+
+	if (keyname == "Up" && movingForward) {
+		movingForward = false;
+	}
+	else if (keyname == "Down" && movingBack) {
+		movingBack = false;
+	}
 }
 
 void Boat::draw() {
@@ -183,8 +291,8 @@ void Boat::draw() {
 	glBindVertexArray(Boat::model.vao);
 	glUseProgram(Boat::model.shader.program); //only the shader is necessary for uniforms
 
-	glShadeModel(GL_FLAT);
-	glProvokingVertex(GL_FIRST_VERTEX_CONVENTION);
+	//wave effect
+	glUniform1f(uniWave, totalTime * 0.5f);
 
 	//update camera
 	glUniformMatrix4fv(Boat::uniView, 1, GL_FALSE, glm::value_ptr(camera.view));

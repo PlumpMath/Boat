@@ -15,6 +15,8 @@
 //standard libs
 #include <chrono>
 #include <iostream>
+#include <string>
+using std::string;
 
 //my stuff
 #include "utils.h"
@@ -163,8 +165,10 @@ void update(float dt) {
 
 	glUniform1f(uniWave, totalTime * 0.2f);
 
+	/*
 	wavePos += waveSpeed * dt;
 	glUniform3fv(uniBigWave, 1, glm::value_ptr(wavePos));
+	*/
 	
 	//draw
 	glDrawElements(GL_TRIANGLES, (verticesPerSide - 1) * (verticesPerSide - 1) * 2 * 3, GL_UNSIGNED_INT, 0);
@@ -174,21 +178,53 @@ void on_quit() {
 	Boat::DestroyModel();
 }
 
+void OnKeyDown(SDL_KeyboardEvent* key) {
+	string keyname = SDL_GetKeyName( key->keysym.sym );
+	std::cout << "down " << keyname << std::endl;
+
+	boat.onkeydown(keyname);
+}
+
+void OnKeyUp(SDL_KeyboardEvent* key) {
+	string keyname = SDL_GetKeyName( key->keysym.sym );
+	std::cout << "up " << keyname << std::endl;
+
+	boat.onkeyup(keyname);
+}
+
 //main game loop boilerplate
 void loop() {
 	//start time
 	auto then = std::chrono::high_resolution_clock::now();
 
 	//event loop
-	SDL_Event windowEvent;
-	while (true) {
+	SDL_Event event;
+	bool run = true;
+	while (run) {
 
 		//calc time
 		auto now = std::chrono::high_resolution_clock::now();
 		float dt = std::chrono::duration_cast<std::chrono::duration<float>>(now - then).count();
 
-		if (SDL_PollEvent(&windowEvent)) {
-			if (windowEvent.type == SDL_QUIT) break;
+		while (SDL_PollEvent(&event)) {
+			switch( event.type ){
+
+				case SDL_QUIT:
+					run = false;
+					break;
+
+				case SDL_KEYDOWN:
+					OnKeyDown(&event.key);
+					break;
+
+				case SDL_KEYUP:
+					OnKeyUp(&event.key);
+					break;
+
+				default:
+					break;
+
+			}
 		}
 
 		// Clear the screen to black
