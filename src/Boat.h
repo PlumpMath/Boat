@@ -17,6 +17,7 @@ class Boat {
 		void draw();
 		void onkeydown(string keyname);
 		void onkeyup(string keyname);
+		void testWaveCollision(glm::vec3 wavePos);
 
 	private:
 		static glModelData model;

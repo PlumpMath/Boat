@@ -24,6 +24,53 @@ using std::string;
 #include "Camera.h"
 #include "Boat.h"
 
+
+/*
+TO DO:
+Interaction
+- waves collide w/ boat
+- collision effect
+- wave drama controller
+
+Boat
+- smoke
+- wake?
+
+Lighthouse
+
+Storm
+- lightning
+- rain
+- lightning shader(s)
+- wave intensity shader
+- storm shader(s)
+
+SFX
+- waves
+- boat engine
+- storm
+- etc???
+
+Other
+- underwater quad
+- jumping fish
+*/
+
+/*
+What waves could do to you
+- carry you backwards
+- knock you sideways
+- cause you to spin
+- cause you to bob
+- cause you to keel over
+- cause you to get stuck in place
+- toss you up in the air
+
+what they will do:
+- side hit = knocked sideways, and spin (speed & distance determined by wave size)
+- direct hit = knocked upside down for a bit (length determined by wave size, but always remains visible)
+*/
+
 glApp app;
 
 Camera camera;
@@ -39,8 +86,10 @@ GLint uniModel;
 GLint uniWave;
 GLint uniBigWave;
 
-glm::vec3 wavePos = glm::vec3(0,1,5);
-glm::vec3 waveSpeed = glm::vec3(0,0,-1);
+//glm::vec3 wavePos = glm::vec3(0,1,5);
+//glm::vec3 waveSpeed = glm::vec3(0,0,-1);
+glm::vec3 wavePos = glm::vec3(-0.5,2,1);
+glm::vec3 waveSpeed = glm::vec3(0,0,0);
 
 float totalTime = 0;
 
@@ -148,6 +197,7 @@ void update(float dt) {
 		);
 	*/
 
+	boat.testWaveCollision(wavePos);
 	boat.update(dt);
 	boat.draw();
 
@@ -165,10 +215,8 @@ void update(float dt) {
 
 	glUniform1f(uniWave, totalTime * 0.2f);
 
-	/*
 	wavePos += waveSpeed * dt;
 	glUniform3fv(uniBigWave, 1, glm::value_ptr(wavePos));
-	*/
 	
 	//draw
 	glDrawElements(GL_TRIANGLES, (verticesPerSide - 1) * (verticesPerSide - 1) * 2 * 3, GL_UNSIGNED_INT, 0);

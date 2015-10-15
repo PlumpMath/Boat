@@ -42,7 +42,7 @@ void Boat::InitModel() {
 		-1.5, 2.5, -5,	0.9, 0.9, 0.4, 	0, 0, -1,
 		-2, 2.5, 5,		0.9, 0.9, 0.4, 	-1, 0, 0,
 		//layer 2 = 19 - 23
-		0, 5, 6,		0.9, 0.9, 0.4, 	0, 0, 1,
+		0, 5, 6,		0.9, 0.9, 0.4, 	0, 1, 0,
 		2, 5, 5,		0.9, 0.9, 0.4, 	0, 1, 0,
 		2, 5, -5,		0.9, 0.9, 0.4, 	0, 1, 0,
 		-2, 5, -5,		0.9, 0.9, 0.4, 	0, 1, 0,
@@ -56,7 +56,7 @@ void Boat::InitModel() {
 		-1, 5, 0,		0.9, 0.9, 0.4, 	0, 0, -1,
 		-1, 5, 4,		0.9, 0.9, 0.4, 	-1, 0, 0,
 		//layer 2 = 29 - 33
-		0, 8.5, 5,		0.9, 0.9, 0.4, 	0, 0, 1,
+		0, 8.5, 5,		0.9, 0.9, 0.4, 	0, 1, 0,
 		1, 8.25, 4,		0.9, 0.9, 0.4, 	0, 1, 0,
 		1, 8.25, 0,		0.9, 0.9, 0.4, 	0, 1, 0,
 		-1, 8, 0,		0.9, 0.9, 0.4, 	0, 1, 0,
@@ -73,6 +73,10 @@ void Boat::InitModel() {
 		0.8, 10, -3,	0.1, 0.1, 0.2, 	0, 1, 0,
 		0, 10, -3.8,	0.1, 0.1, 0.2, 	0, 1, 0,
 		-0.8, 10, -3,	0.1, 0.1, 0.2, 	0, 1, 0,
+
+		//extras (for shading on top deck) = 42, 43
+		1, 5, 0,		0.9, 0.9, 0.4,	1, 0, 0, //replaces 26
+		-1, 5, 0,		0.9, 0.9, 0.4,	-1, 0, 0, //replaces 27
 	};
 
 	GLuint elements[] = {
@@ -119,15 +123,15 @@ void Boat::InitModel() {
 		//TOP DECK
 		//sides
 		25, 29, 24,
-		30, 25, 29,
+		30, 29, 25,
 		30, 26, 25,
-		31, 30, 26,
+		31, 30, 42, //42 (replacement for 26)
 		31, 27, 26,
 		32, 31, 27,
-		32, 28, 27,
+		32, 28, 43, //43 (replacement for 27)
 		33, 32, 28,
 		33, 29, 28,
-		24, 28, 29,
+		29, 28, 24,
 		//top
 		29, 30, 33,
 		30, 31, 32,
@@ -175,6 +179,9 @@ Boat::Boat() {
 	//transform = glm::scale(transform, glm::vec3(0.08, 0.08, 0.08));
 	scale = glm::vec3(0.08, 0.08, 0.08);
 	speed = 10;
+
+	position.y = 1;
+	position.x = 10;
 	//transform = glm::translate(transform, glm::vec3(0, 1, 0));
 }
 
@@ -192,35 +199,38 @@ void Boat::update(float dt) {
 	}
 
 	//move
+	float accelFactor = 0.6;
+	float frictFactor = 0.4;
+
 	if (movingLeft) {
-		velocity.x += speed * 0.3 * dt;
+		velocity.x += speed * accelFactor * dt;
 		velocity.x = std::min(velocity.x, speed);
 	}
 	else if (movingRight) {
-		velocity.x -= speed * 0.3 * dt;
+		velocity.x -= speed * accelFactor * dt;
 		velocity.x = std::max(velocity.x, -speed);
 	}
 	else { //friction
 		if (velocity.x != 0) {
 			float sign = (velocity.x / std::abs(velocity.x));
-			float newX = velocity.x - (speed * 0.3 * sign * dt);
+			float newX = velocity.x - (speed * frictFactor * sign * dt);
 			if ( (newX < 0) != (velocity.x < 0) ) newX = 0;
 			velocity.x = newX;
 		}
 	}
 
 	if (movingForward) {
-		velocity.z += speed * 0.3 * dt;
+		velocity.z += speed * accelFactor * dt;
 		velocity.z = std::min(velocity.z, speed);
 	}
 	else if (movingBack) {
-		velocity.z -= speed * 0.3 * dt;
+		velocity.z -= speed * accelFactor * dt;
 		velocity.z = std::max(velocity.z, -speed * 0.5f);
 	}
 	else { //friction
 		if (velocity.z != 0) {
 			float sign = (velocity.z / std::abs(velocity.z));
-			float newZ = velocity.z - (speed * 0.3 * sign * dt);
+			float newZ = velocity.z - (speed * frictFactor * sign * dt);
 			if ( (newZ < 0) != (velocity.z < 0) ) newZ = 0;
 			velocity.z = newZ;
 		}
@@ -306,6 +316,18 @@ void Boat::onkeyup(string keyname) {
 	}
 	else if (keyname == "Down" && movingBack) {
 		movingBack = false;
+	}
+}
+
+void Boat::testWaveCollision(glm::vec3 wavePos) {
+	glm::vec2 boatCollisionPos = glm::vec2(position.x, position.z);
+	glm::vec2 waveCollisionPos = glm::vec2(wavePos.x * 4 * 8, wavePos.z * 8); //move wave into boat space
+	float dist = glm::distance(boatCollisionPos, waveCollisionPos);
+	float distX = std::abs(waveCollisionPos.x - boatCollisionPos.x);
+	float distZ = std::abs(waveCollisionPos.y - boatCollisionPos.y);
+	
+	if (distX < wavePos.y * 10 * 3 && distZ < wavePos.y * 10) { //stupid magic numbers because of all the distortions I caused
+		std::cout << "HIT!!!" << std::endl; //
 	}
 }
 
