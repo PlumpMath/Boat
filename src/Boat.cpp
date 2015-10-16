@@ -343,7 +343,7 @@ void Boat::tiltRight() {
 	goalRotTimer = 0;
 }
 
-void Boat::testWaveCollision(glm::vec3 wavePos) {
+bool Boat::testWaveCollision(glm::vec3 wavePos) {
 	glm::vec2 boatCollisionPos = glm::vec2(position.x, position.z);
 	glm::vec2 waveCollisionPos = glm::vec2(wavePos.x * 4 * 8, wavePos.z * 8); //move wave into boat space
 	//float dist = glm::distance(boatCollisionPos, waveCollisionPos);
@@ -365,10 +365,14 @@ void Boat::testWaveCollision(glm::vec3 wavePos) {
 			untilt();
 
 			//apply a force
-			glm::vec2 force = glm::normalize(boatCollisionPos - waveCollisionPos) * 10.0f * wavePos.y;
+			glm::vec2 force = glm::normalize(boatCollisionPos - waveCollisionPos) * 15.0f * wavePos.y;
 			velocity = glm::vec3(force.x, 0, force.y);
+
+			return true;
 		}
 	}
+
+	return false;
 }
 
 void Boat::draw() {

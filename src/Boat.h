@@ -17,7 +17,7 @@ class Boat {
 		void draw();
 		void onkeydown(string keyname);
 		void onkeyup(string keyname);
-		void testWaveCollision(glm::vec3 wavePos);
+		bool testWaveCollision(glm::vec3 wavePos);
 		
 		glm::vec3 position;
 		glm::vec3 rotation;

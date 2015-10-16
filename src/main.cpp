@@ -238,12 +238,6 @@ void update(float dt) {
 			glm::vec3(0.0f, 1.0f, 0.0f)
 		);
 	*/
-
-	boat.testWaveCollision(wavePos);
-	boat.update(dt);
-	boat.draw();
-
-	//std::cout << wavePos.x << " " << wavePos.z << std::endl;
 	//check for waves out of bounds
 	if (wavePos.x - (wavePos.y * 3) > 2 || 
 		wavePos.x + (wavePos.y * 3) < -2 ||
@@ -255,6 +249,34 @@ void update(float dt) {
 		waveSpeed = waveToBoatVec3(wavePos, boat);
 		wavePos.y = 1;
 	}
+
+	if (didWaveHitPlayer) {
+		waveDissapearTimer += dt;
+
+		if (waveDissapearTimer > 1) {
+			//new wave!
+			wavePos = randomWaveStartingPosition(1);
+			waveSpeed = waveToBoatVec3(wavePos, boat);
+			wavePos.y = 1;
+			didWaveHitPlayer = false;
+		}
+		else {
+			wavePos.y = waveStartHeight * (1 - waveDissapearTimer);
+		}
+	}
+	else {
+		didWaveHitPlayer = boat.testWaveCollision(wavePos);
+
+		if (didWaveHitPlayer) {
+			waveDissapearTimer = 0;
+			waveStartHeight = wavePos.y;
+		}
+	}
+	
+	boat.update(dt);
+	boat.draw();
+
+	//std::cout << wavePos.x << " " << wavePos.z << std::endl;
 
 	glBindVertexArray(vao);
 	glUseProgram(shader.program);
