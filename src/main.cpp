@@ -14,9 +14,11 @@
 
 //standard libs
 #include <chrono>
+#include <time.h>  //chrono vs time?
 #include <iostream>
 #include <string>
 using std::string;
+#include <stdlib.h> 
 
 //my stuff
 #include "utils.h"
@@ -86,14 +88,49 @@ GLint uniModel;
 GLint uniWave;
 GLint uniBigWave;
 
-//glm::vec3 wavePos = glm::vec3(0,1,5);
-//glm::vec3 waveSpeed = glm::vec3(0,0,-1);
-glm::vec3 wavePos = glm::vec3(-0.5,2,1);
-glm::vec3 waveSpeed = glm::vec3(0,0,0);
+glm::vec3 wavePos = glm::vec3(2,1,-3);
+glm::vec3 waveSpeed = glm::vec3(-1,0,1);
+bool didWaveHitPlayer = false;
+float waveDissapearTimer;
+float waveStartHeight;
 
 float totalTime = 0;
 
 Boat boat;
+
+
+glm::vec3 randomWaveStartingPosition(float waveHeight) {
+	float rad = glm::radians( (rand() % 360) * 1.0f );
+	std::cout << rad << std::endl;
+	glm::vec3 unit = glm::vec3( cos(rad), 0, sin(rad) );
+	std::cout << unit.x << " " << unit.z << std::endl;
+	glm::vec3 pos = glm::vec3( unit.x * 2, 0, unit.z * 3 );//unit * 3.0f;//5.0f;
+	pos += glm::vec3(unit.x * waveHeight * 3, 0, unit.z * waveHeight); //unit * waveHeight;
+
+	return pos;
+}
+
+glm::vec3 wavePosToWorldSpace(glm::vec3 pos) {
+	return glm::vec3(pos.x * 3, pos.y, pos.z);
+}
+
+glm::vec3 boatPosToWorldSpace(Boat b) {
+	return glm::vec3(b.position.x * b.scale.x, b.position.y * b.scale.y, b.position.z * b.scale.z);
+}
+
+glm::vec3 waveToBoatVec3(glm::vec3 waveStart, Boat b) {
+	glm::vec3 boatPos = boatPosToWorldSpace(b);
+	boatPos.y = 0;
+
+	glm::vec3 wavePos = wavePosToWorldSpace(waveStart);
+	wavePos.y = 0;
+
+	glm::vec3 toBoat = boatPos - wavePos;
+	toBoat.x /= 3;
+	toBoat = glm::normalize(toBoat);
+
+	return toBoat;
+}
 
 int verticesPerSide = 50;
 void generateOceanMesh() {
@@ -183,6 +220,11 @@ void ready() {
 	glBindVertexArray(0);
 
 	Boat::InitModel();
+
+	//random wave
+	wavePos = randomWaveStartingPosition(1);
+	waveSpeed = waveToBoatVec3(wavePos, boat);
+	wavePos.y = 1;
 }
 
 void update(float dt) {
@@ -200,6 +242,19 @@ void update(float dt) {
 	boat.testWaveCollision(wavePos);
 	boat.update(dt);
 	boat.draw();
+
+	//std::cout << wavePos.x << " " << wavePos.z << std::endl;
+	//check for waves out of bounds
+	if (wavePos.x - (wavePos.y * 3) > 2 || 
+		wavePos.x + (wavePos.y * 3) < -2 ||
+		wavePos.z - (wavePos.y) > 3 || 
+		wavePos.z + (wavePos.y) < -3) 
+	{
+		//new wave!
+		wavePos = randomWaveStartingPosition(1);
+		waveSpeed = waveToBoatVec3(wavePos, boat);
+		wavePos.y = 1;
+	}
 
 	glBindVertexArray(vao);
 	glUseProgram(shader.program);
@@ -231,6 +286,12 @@ void OnKeyDown(SDL_KeyboardEvent* key) {
 	std::cout << "down " << keyname << std::endl;
 
 	boat.onkeydown(keyname);
+
+	if (keyname == "Space") {
+		wavePos = randomWaveStartingPosition(1);
+		waveSpeed = waveToBoatVec3(wavePos, boat);
+		wavePos.y = 1;
+	}
 }
 
 void OnKeyUp(SDL_KeyboardEvent* key) {
@@ -244,6 +305,7 @@ void OnKeyUp(SDL_KeyboardEvent* key) {
 void loop() {
 	//start time
 	auto then = std::chrono::high_resolution_clock::now();
+	//std::cout << "RAND" << rand() << std::endl;
 
 	//event loop
 	SDL_Event event;
@@ -291,6 +353,8 @@ void loop() {
 
 int main(int argc, char *argv[])
 {
+	srand( time(NULL) ); //initialize random numbers
+
 	app = start();
 	ready();
 

@@ -18,6 +18,10 @@ class Boat {
 		void onkeydown(string keyname);
 		void onkeyup(string keyname);
 		void testWaveCollision(glm::vec3 wavePos);
+		
+		glm::vec3 position;
+		glm::vec3 rotation;
+		glm::vec3 scale;
 
 	private:
 		static glModelData model;
@@ -27,9 +31,6 @@ class Boat {
 		static GLint uniWave;
 
 		glm::mat4 transform;
-		glm::vec3 position;
-		glm::vec3 rotation;
-		glm::vec3 scale;
 
 		float speed;
 		glm::vec3 velocity;
@@ -39,4 +40,12 @@ class Boat {
 
 		glm::vec3 goalRot, startRot;
 		float goalRotTimer;
+
+		bool isStunned;
+		float stunTimer;
+
+		void untilt();
+		void tiltLeft();
+		void tiltRight();
+		void stunSpin(float dt);
 };

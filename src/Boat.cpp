@@ -251,83 +251,123 @@ void Boat::update(float dt) {
 
 	//update transform
 	transform = glm::mat4(); //return to identity matrix
+
 	transform = glm::scale(transform, scale); //scale
 	transform = glm::translate(transform, position); //position
 	//rotation
 	transform = glm::rotate(transform, glm::radians(rotation.x), glm::vec3(1,0,0));
 	transform = glm::rotate(transform, glm::radians(rotation.y), glm::vec3(0,1,0));
 	transform = glm::rotate(transform, glm::radians(rotation.z), glm::vec3(0,0,1));
+
+	if (isStunned) {
+		stunSpin(dt);
+	}
+}
+
+void Boat::stunSpin(float dt) {
+	float maxStunTime = 2.0f;
+
+	stunTimer += dt;
+	transform = glm::rotate(transform, glm::radians(720 * (stunTimer / maxStunTime)), glm::vec3(0,1,0));
+
+	if (stunTimer > maxStunTime) {
+		isStunned = false;
+	}
 }
 
 void Boat::onkeydown(string keyname) {
-	if (keyname == "Left" && !movingLeft) {
-		movingLeft = true;
-		movingRight = false;
+	if (!isStunned) {
+		if (keyname == "Left" && !movingLeft) {
+			movingLeft = true;
+			movingRight = false;
+			tiltLeft();
+		}
+		else if (keyname == "Right" && !movingRight) {
+			movingRight = true;
+			movingLeft = false;
+			tiltRight();
+		}
 
-		//start leftward rotation
-		startRot = rotation;
-		goalRot.y = 15;
-		goalRot.z = -10;
-		goalRotTimer = 0;
-	}
-	else if (keyname == "Right" && !movingRight) {
-		movingRight = true;
-		movingLeft = false;
-
-		//start rightward rotation
-		startRot = rotation;
-		goalRot.y = -15;
-		goalRot.z = 10;
-		goalRotTimer = 0;
-	}
-
-	if (keyname == "Up" && !movingForward) {
-		movingForward = true;
-		movingBack = false;
-	}
-	else if (keyname == "Down" && !movingBack) {
-		movingBack = true;
-		movingForward = false;
+		if (keyname == "Up" && !movingForward) {
+			movingForward = true;
+			movingBack = false;
+		}
+		else if (keyname == "Down" && !movingBack) {
+			movingBack = true;
+			movingForward = false;
+		}
 	}
 }
 
 void Boat::onkeyup(string keyname) {
-	if (keyname == "Left" && movingLeft) {
-		movingLeft = false;
+	if (!isStunned) {
+		if (keyname == "Left" && movingLeft) {
+			movingLeft = false;
+			untilt();
+		}
+		else if (keyname == "Right" && movingRight) {
+			movingRight = false;
+			untilt();
+		}
 
-		//start recentering rotation
-		startRot = rotation;
-		goalRot.y = 0;
-		goalRot.z = 0;
-		goalRotTimer = 0;
+		if (keyname == "Up" && movingForward) {
+			movingForward = false;
+		}
+		else if (keyname == "Down" && movingBack) {
+			movingBack = false;
+		}
 	}
-	else if (keyname == "Right" && movingRight) {
-		movingRight = false;
+}
 
-		//start recentering rotation
-		startRot = rotation;
-		goalRot.y = 0;
-		goalRot.z = 0;
-		goalRotTimer = 0;
-	}
+void Boat::untilt() {
+	//start recentering rotation
+	startRot = rotation;
+	goalRot.y = 0;
+	goalRot.z = 0;
+	goalRotTimer = 0;
+}
 
-	if (keyname == "Up" && movingForward) {
-		movingForward = false;
-	}
-	else if (keyname == "Down" && movingBack) {
-		movingBack = false;
-	}
+void Boat::tiltLeft() {
+	//start leftward rotation
+	startRot = rotation;
+	goalRot.y = 15;
+	goalRot.z = -10;
+	goalRotTimer = 0;
+}
+
+void Boat::tiltRight() {
+	//start rightward rotation
+	startRot = rotation;
+	goalRot.y = -15;
+	goalRot.z = 10;
+	goalRotTimer = 0;
 }
 
 void Boat::testWaveCollision(glm::vec3 wavePos) {
 	glm::vec2 boatCollisionPos = glm::vec2(position.x, position.z);
 	glm::vec2 waveCollisionPos = glm::vec2(wavePos.x * 4 * 8, wavePos.z * 8); //move wave into boat space
-	float dist = glm::distance(boatCollisionPos, waveCollisionPos);
+	//float dist = glm::distance(boatCollisionPos, waveCollisionPos);
 	float distX = std::abs(waveCollisionPos.x - boatCollisionPos.x);
 	float distZ = std::abs(waveCollisionPos.y - boatCollisionPos.y);
 	
 	if (distX < wavePos.y * 10 * 3 && distZ < wavePos.y * 10) { //stupid magic numbers because of all the distortions I caused
-		std::cout << "HIT!!!" << std::endl; //
+		
+		if (!isStunned) {
+
+			isStunned = true;
+			stunTimer = 0;
+
+			movingLeft = false;
+			movingRight = false;
+			movingForward = false;
+			movingBack = false;
+
+			untilt();
+
+			//apply a force
+			glm::vec2 force = glm::normalize(boatCollisionPos - waveCollisionPos) * 10.0f * wavePos.y;
+			velocity = glm::vec3(force.x, 0, force.y);
+		}
 	}
 }
 
