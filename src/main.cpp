@@ -29,48 +29,24 @@ using std::string;
 
 /*
 TO DO:
-Interaction
-- waves collide w/ boat
-- collision effect
-- wave drama controller
-
-Boat
-- smoke
-- wake?
-
-Lighthouse
-
-Storm
-- lightning
-- rain
-- lightning shader(s)
-- wave intensity shader
-- storm shader(s)
-
-SFX
-- waves
-- boat engine
-- storm
-- etc???
-
-Other
+- make 4 difficulty levels
+- tweak boat control feel
+- tweak boat knockback feel
+- drama controller
+	- test timing
+- storm effects
+	- lightning
+	- rain
+	- lightning shaders
+	- wave intensity
+	- storm color shaders
+- boat polish
+	- smoke
+	- wake
+- lighthouse model
+- SFX
 - underwater quad
-- jumping fish
-*/
-
-/*
-What waves could do to you
-- carry you backwards
-- knock you sideways
-- cause you to spin
-- cause you to bob
-- cause you to keel over
-- cause you to get stuck in place
-- toss you up in the air
-
-what they will do:
-- side hit = knocked sideways, and spin (speed & distance determined by wave size)
-- direct hit = knocked upside down for a bit (length determined by wave size, but always remains visible)
+- jumping fish?
 */
 
 glApp app;
@@ -88,16 +64,37 @@ GLint uniModel;
 GLint uniWave;
 GLint uniBigWave;
 
-glm::vec3 wavePos = glm::vec3(2,1,-3);
-glm::vec3 waveSpeed = glm::vec3(-1,0,1);
+glm::vec3 wavePos = glm::vec3(0,1,3);
+glm::vec3 waveSpeed = glm::vec3(0,0,-1);
 bool didWaveHitPlayer = false;
 float waveDissapearTimer;
 float waveStartHeight;
 
+struct DifficultyLevel {
+	float minSize;
+	float maxSize;
+	float minSpeed;
+	float maxSpeed;
+	float timeBetweenWaves;
+};
+
+DifficultyLevel easy = {
+	0.7, 1,
+	0.3, 1,
+	3
+};
+
+DifficultyLevel hard = {
+	1, 1.5,
+	1, 1.5,
+	3
+};
+
+DifficultyLevel curDifficulty = hard;
+
 float totalTime = 0;
 
 Boat boat;
-
 
 glm::vec3 randomWaveStartingPosition(float waveHeight) {
 	float rad = glm::radians( (rand() % 360) * 1.0f );
@@ -130,6 +127,22 @@ glm::vec3 waveToBoatVec3(glm::vec3 waveStart, Boat b) {
 	toBoat = glm::normalize(toBoat);
 
 	return toBoat;
+}
+
+void startNewWave(DifficultyLevel difficulty) {
+	std::cout << "start new wave" << std::endl;
+
+	float r1 = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+	float r2 = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+
+	float height = difficulty.minSize + (r1 * (difficulty.maxSize - difficulty.minSize));
+	float speed = difficulty.minSpeed + (r2 * (difficulty.maxSpeed - difficulty.minSpeed));
+
+	wavePos = randomWaveStartingPosition(height);
+	waveSpeed = waveToBoatVec3(wavePos, boat) * speed;
+	wavePos.y = height;
+
+	didWaveHitPlayer = false;
 }
 
 int verticesPerSide = 50;
@@ -222,43 +235,27 @@ void ready() {
 	Boat::InitModel();
 
 	//random wave
-	wavePos = randomWaveStartingPosition(1);
-	waveSpeed = waveToBoatVec3(wavePos, boat);
-	wavePos.y = 1;
+	startNewWave(curDifficulty);
 }
 
-void update(float dt) {
+void waveUpdate(float dt) {
+	//move wave
+	wavePos += waveSpeed * dt;
 
-	totalTime += dt;
-
-	/*
-	camera.view = glm::rotate(
-			camera.view,
-			-1.0f * 0.05f * dt * glm::radians(180.0f),
-			glm::vec3(0.0f, 1.0f, 0.0f)
-		);
-	*/
 	//check for waves out of bounds
 	if (wavePos.x - (wavePos.y * 3) > 2 || 
 		wavePos.x + (wavePos.y * 3) < -2 ||
 		wavePos.z - (wavePos.y) > 3 || 
 		wavePos.z + (wavePos.y) < -3) 
 	{
-		//new wave!
-		wavePos = randomWaveStartingPosition(1);
-		waveSpeed = waveToBoatVec3(wavePos, boat);
-		wavePos.y = 1;
+		startNewWave(curDifficulty);
 	}
 
 	if (didWaveHitPlayer) {
 		waveDissapearTimer += dt;
 
 		if (waveDissapearTimer > 1) {
-			//new wave!
-			wavePos = randomWaveStartingPosition(1);
-			waveSpeed = waveToBoatVec3(wavePos, boat);
-			wavePos.y = 1;
-			didWaveHitPlayer = false;
+			startNewWave(curDifficulty);
 		}
 		else {
 			wavePos.y = waveStartHeight * (1 - waveDissapearTimer);
@@ -272,12 +269,9 @@ void update(float dt) {
 			waveStartHeight = wavePos.y;
 		}
 	}
-	
-	boat.update(dt);
-	boat.draw();
+}
 
-	//std::cout << wavePos.x << " " << wavePos.z << std::endl;
-
+void drawOcean() {
 	glBindVertexArray(vao);
 	glUseProgram(shader.program);
 
@@ -292,11 +286,29 @@ void update(float dt) {
 
 	glUniform1f(uniWave, totalTime * 0.2f);
 
-	wavePos += waveSpeed * dt;
 	glUniform3fv(uniBigWave, 1, glm::value_ptr(wavePos));
 	
 	//draw
-	glDrawElements(GL_TRIANGLES, (verticesPerSide - 1) * (verticesPerSide - 1) * 2 * 3, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, (verticesPerSide - 1) * (verticesPerSide - 1) * 2 * 3, GL_UNSIGNED_INT, 0);	
+}
+
+void rotateCameraForTesting(float dt) {
+	camera.view = glm::rotate(
+			camera.view,
+			-1.0f * 0.05f * dt * glm::radians(180.0f),
+			glm::vec3(0.0f, 1.0f, 0.0f)
+		);
+}
+
+void update(float dt) {
+
+	totalTime += dt;
+
+	//waveUpdate(dt);
+	boat.update(dt);
+	
+	boat.draw();
+	drawOcean();
 }
 
 void on_quit() {
@@ -305,20 +317,22 @@ void on_quit() {
 
 void OnKeyDown(SDL_KeyboardEvent* key) {
 	string keyname = SDL_GetKeyName( key->keysym.sym );
-	std::cout << "down " << keyname << std::endl;
+	//std::cout << "down " << keyname << std::endl;
 
 	boat.onkeydown(keyname);
 
+	/*
 	if (keyname == "Space") {
 		wavePos = randomWaveStartingPosition(1);
 		waveSpeed = waveToBoatVec3(wavePos, boat);
 		wavePos.y = 1;
 	}
+	*/
 }
 
 void OnKeyUp(SDL_KeyboardEvent* key) {
 	string keyname = SDL_GetKeyName( key->keysym.sym );
-	std::cout << "up " << keyname << std::endl;
+	//std::cout << "up " << keyname << std::endl;
 
 	boat.onkeyup(keyname);
 }

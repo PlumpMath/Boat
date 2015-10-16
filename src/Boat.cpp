@@ -244,10 +244,28 @@ void Boat::update(float dt) {
 
 	//bounds
 	//std::cout << position.x << " " << position.z << std::endl;
-	if (position.x > 72) position.x = 72;
-	if (position.x < -72) position.x = -72;
-	if (position.z > 16) position.z = 16;
-	if (position.z < -12) position.z = -12;
+	float minBoundX = 30;
+	float maxBoundX = 60;
+	float deltaBoundX = maxBoundX - minBoundX;
+	float zNorm = (position.z + 12) / 28.0f;
+	float curBoundX = minBoundX + (deltaBoundX * zNorm);
+
+	if (position.x > curBoundX) {
+		position.x = curBoundX;
+		if (velocity.x > 0) velocity.x = 0;
+	}
+	if (position.x < -curBoundX) {
+		position.x = -curBoundX;
+		if (velocity.x < 0) velocity.x = 0;
+	}
+	if (position.z > 16) {
+		position.z = 16;
+		if (velocity.z > 0) velocity.z = 0;
+	}
+	if (position.z < -12) {
+		position.z = -12;
+		if (velocity.z < 0) velocity.z = 0;
+	}
 
 	//update transform
 	transform = glm::mat4(); //return to identity matrix
