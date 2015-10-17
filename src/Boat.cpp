@@ -177,11 +177,13 @@ void Boat::DestroyModel() {
 //methods
 Boat::Boat() {
 	//transform = glm::scale(transform, glm::vec3(0.08, 0.08, 0.08));
-	scale = glm::vec3(0.08, 0.08, 0.08);
-	speed = 10;
+	//scale = glm::vec3(0.08, 0.08, 0.08); 
+	scale = glm::vec3(0.06, 0.06, 0.06);
+	scaleNormFactor = (0.08 / scale.x); //dumb hack 'cause I made everything work w/ size 0.08
+	speed = 12 * scaleNormFactor;
 
-	position.y = 1;
-	position.x = 10;
+	position.y = 1 * scaleNormFactor;
+	position.x = 10 * scaleNormFactor;
 	//transform = glm::translate(transform, glm::vec3(0, 1, 0));
 }
 
@@ -199,7 +201,7 @@ void Boat::update(float dt) {
 	}
 
 	//move
-	float accelFactor = 0.6;
+	float accelFactor = 2;
 	float frictFactor = 0.4;
 
 	if (movingLeft) {
@@ -244,10 +246,15 @@ void Boat::update(float dt) {
 
 	//bounds
 	//std::cout << position.x << " " << position.z << std::endl;
-	float minBoundX = 30;
-	float maxBoundX = 60;
+	float minBoundX = 30 * scaleNormFactor;
+	float maxBoundX = 60 * scaleNormFactor;
+	float posBoundZ = 20 * scaleNormFactor;
+	float negBoundZ = -20 * scaleNormFactor;
+
+	float deltaBoundZ = posBoundZ - negBoundZ;
+	float zNorm = (position.z + (-1 * negBoundZ)) / deltaBoundZ;
+
 	float deltaBoundX = maxBoundX - minBoundX;
-	float zNorm = (position.z + 12) / 28.0f;
 	float curBoundX = minBoundX + (deltaBoundX * zNorm);
 
 	if (position.x > curBoundX) {
@@ -258,12 +265,12 @@ void Boat::update(float dt) {
 		position.x = -curBoundX;
 		if (velocity.x < 0) velocity.x = 0;
 	}
-	if (position.z > 16) {
-		position.z = 16;
+	if (position.z > posBoundZ) {
+		position.z = posBoundZ;
 		if (velocity.z > 0) velocity.z = 0;
 	}
-	if (position.z < -12) {
-		position.z = -12;
+	if (position.z < negBoundZ) {
+		position.z = negBoundZ;
 		if (velocity.z < 0) velocity.z = 0;
 	}
 
@@ -363,12 +370,14 @@ void Boat::tiltRight() {
 
 bool Boat::testWaveCollision(glm::vec3 wavePos) {
 	glm::vec2 boatCollisionPos = glm::vec2(position.x, position.z);
-	glm::vec2 waveCollisionPos = glm::vec2(wavePos.x * 4 * 8, wavePos.z * 8); //move wave into boat space
+	glm::vec2 waveCollisionPos = glm::vec2(wavePos.x * 4 * 8 * scaleNormFactor, wavePos.z * 8 * scaleNormFactor); //move wave into boat space
 	//float dist = glm::distance(boatCollisionPos, waveCollisionPos);
 	float distX = std::abs(waveCollisionPos.x - boatCollisionPos.x);
 	float distZ = std::abs(waveCollisionPos.y - boatCollisionPos.y);
+
+	float magicNumber = 6 * scaleNormFactor; //stupid magic numbers to get wave size into boat space
 	
-	if (distX < wavePos.y * 10 * 3 && distZ < wavePos.y * 10) { //stupid magic numbers because of all the distortions I caused
+	if (distX < wavePos.y * magicNumber * 3 && distZ < wavePos.y * magicNumber) { 
 		
 		if (!isStunned) {
 
@@ -383,7 +392,7 @@ bool Boat::testWaveCollision(glm::vec3 wavePos) {
 			untilt();
 
 			//apply a force
-			glm::vec2 force = glm::normalize(boatCollisionPos - waveCollisionPos) * 15.0f * wavePos.y;
+			glm::vec2 force = glm::normalize(boatCollisionPos - waveCollisionPos) * (speed * 1.7f) * wavePos.y;
 			velocity = glm::vec3(force.x, 0, force.y);
 
 			return true;

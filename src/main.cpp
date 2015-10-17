@@ -90,8 +90,16 @@ DifficultyLevel hard = {
 	3
 };
 
-DifficultyLevel curDifficulty = hard;
+DifficultyLevel impossible = {
+	1, 1.5,
+	1, 1.5,
+	3
+};
 
+DifficultyLevel curDifficulty = easy;
+
+bool betweenWaves = false;
+float betweenWavesTimer = 0;
 float totalTime = 0;
 
 Boat boat;
@@ -143,6 +151,14 @@ void startNewWave(DifficultyLevel difficulty) {
 	wavePos.y = height;
 
 	didWaveHitPlayer = false;
+}
+
+void waitForNextWave() {
+	wavePos = glm::vec3(0,0,100); //hide the dumb wave
+	waveSpeed = glm::vec3(0,0,0);
+
+	betweenWavesTimer = 0;
+	betweenWaves = true;
 }
 
 int verticesPerSide = 50;
@@ -239,36 +255,54 @@ void ready() {
 }
 
 void waveUpdate(float dt) {
-	//move wave
-	wavePos += waveSpeed * dt;
 
-	//check for waves out of bounds
-	if (wavePos.x - (wavePos.y * 3) > 2 || 
-		wavePos.x + (wavePos.y * 3) < -2 ||
-		wavePos.z - (wavePos.y) > 3 || 
-		wavePos.z + (wavePos.y) < -3) 
-	{
-		startNewWave(curDifficulty);
-	}
 
-	if (didWaveHitPlayer) {
-		waveDissapearTimer += dt;
+	if (betweenWaves) {
 
-		if (waveDissapearTimer > 1) {
+		betweenWavesTimer += dt;
+		//std::cout <<  betweenWavesTimer << std::endl;
+
+		if (betweenWavesTimer > curDifficulty.timeBetweenWaves) {
+			//std::cout << "wave timer is done!" << std::endl;
 			startNewWave(curDifficulty);
-		}
-		else {
-			wavePos.y = waveStartHeight * (1 - waveDissapearTimer);
+			betweenWaves = false;
 		}
 	}
 	else {
-		didWaveHitPlayer = boat.testWaveCollision(wavePos);
 
-		if (didWaveHitPlayer) {
-			waveDissapearTimer = 0;
-			waveStartHeight = wavePos.y;
+		//move the wave
+		wavePos += waveSpeed * dt;	
+
+		//check for waves out of bounds
+		if (wavePos.x - (wavePos.y * 3) > 2 || 
+			wavePos.x + (wavePos.y * 3) < -2 ||
+			wavePos.z - (wavePos.y) > 3 || 
+			wavePos.z + (wavePos.y) < -3) 
+		{
+			waitForNextWave();
+		}
+
+		if (didWaveHitPlayer) { //waves that have hit the player dissapear
+			float dissapearTimeEnd = 1.5f;
+			waveDissapearTimer += dt;
+
+			if (waveDissapearTimer > dissapearTimeEnd) {
+				waitForNextWave();
+			}
+			else {
+				wavePos.y = waveStartHeight * ((dissapearTimeEnd - waveDissapearTimer) / dissapearTimeEnd);
+			}
+		}
+		else { //check for wave collisions
+			didWaveHitPlayer = boat.testWaveCollision(wavePos);
+
+			if (didWaveHitPlayer) {
+				waveDissapearTimer = 0;
+				waveStartHeight = wavePos.y;
+			}
 		}
 	}
+	
 }
 
 void drawOcean() {
@@ -281,7 +315,7 @@ void drawOcean() {
 
 	//update model transform
 	glm::mat4 model;
-	model = glm::scale(model, glm::vec3(2.5,1,1));
+	model = glm::scale(model, glm::vec3(2.52,1,1));
 	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
 
 	glUniform1f(uniWave, totalTime * 0.2f);
@@ -304,7 +338,7 @@ void update(float dt) {
 
 	totalTime += dt;
 
-	//waveUpdate(dt);
+	waveUpdate(dt);
 	boat.update(dt);
 	
 	boat.draw();

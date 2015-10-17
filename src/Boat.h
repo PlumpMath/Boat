@@ -44,6 +44,8 @@ class Boat {
 		bool isStunned;
 		float stunTimer;
 
+		float scaleNormFactor;
+
 		void untilt();
 		void tiltLeft();
 		void tiltRight();
