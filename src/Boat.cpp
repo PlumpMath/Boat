@@ -36,11 +36,11 @@ void Boat::InitModel() {
 
 		//LOWER DECK
 		//layer 1 = 14 - 18
-		0, 2.5, 6,		0.9, 0.9, 0.4, 	0, 0, 1,
-		2, 2.5, 5,		0.9, 0.9, 0.4, 	1, 0, 0,
-		1.5, 2.5, -5,	0.9, 0.9, 0.4, 	0, 0, -1,
-		-1.5, 2.5, -5,	0.9, 0.9, 0.4, 	0, 0, -1,
-		-2, 2.5, 5,		0.9, 0.9, 0.4, 	-1, 0, 0,
+		0, 2.5, 6,		0.9, 0.9, 0.4, 	0, 0, 1, //14
+		2, 2.5, 5,		0.9, 0.9, 0.4, 	1, 0, 0, //15
+		1.5, 2.5, -5,	0.9, 0.9, 0.4, 	0, 0, -1, //16
+		-1.5, 2.5, -5,	0.9, 0.9, 0.4, 	0, 0, -1, //17
+		-2, 2.5, 5,		0.9, 0.9, 0.4, 	-1, 0, 0, //18
 		//layer 2 = 19 - 23
 		0, 5, 6,		0.9, 0.9, 0.4, 	0, 1, 0,
 		2, 5, 5,		0.9, 0.9, 0.4, 	0, 1, 0,
@@ -50,11 +50,11 @@ void Boat::InitModel() {
 
 		//TOP DECK
 		//layer 1 = 24 - 28
-		0, 5, 4.5,		0.9, 0.9, 0.4, 	0, 0, 1,
-		1, 5, 4,		0.9, 0.9, 0.4, 	1, 0, 0,
-		1, 5, 0,		0.9, 0.9, 0.4, 	0, 0, -1,
-		-1, 5, 0,		0.9, 0.9, 0.4, 	0, 0, -1,
-		-1, 5, 4,		0.9, 0.9, 0.4, 	-1, 0, 0,
+		0, 5, 4.5,		0.9, 0.9, 0.4, 	0, 0, 1, //24
+		1, 5, 4,		0.9, 0.9, 0.4, 	1, 0, 0, //25
+		1, 5, 0,		0.9, 0.9, 0.4, 	0, 0, -1, //26
+		-1, 5, 0,		0.9, 0.9, 0.4, 	0, 0, -1, //27
+		-1, 5, 4,		0.9, 0.9, 0.4, 	-1, 0, 0, //28
 		//layer 2 = 29 - 33
 		0, 8.5, 5,		0.9, 0.9, 0.4, 	0, 1, 0,
 		1, 8.25, 4,		0.9, 0.9, 0.4, 	0, 1, 0,
@@ -74,9 +74,15 @@ void Boat::InitModel() {
 		0, 10, -3.8,	0.1, 0.1, 0.2, 	0, 1, 0,
 		-0.8, 10, -3,	0.1, 0.1, 0.2, 	0, 1, 0,
 
-		//extras (for shading on top deck) = 42, 43
+		//extras (for shading on top deck) = 42 - 45
 		1, 5, 0,		0.9, 0.9, 0.4,	1, 0, 0, //replaces 26
 		-1, 5, 0,		0.9, 0.9, 0.4,	-1, 0, 0, //replaces 27
+		1, 5, 4,		0.9, 0.9, 0.4, 	0, 0, 1, //replaces 25
+		-1, 5, 4,		0.9, 0.9, 0.4, 	0, 0, 1, //replaces 28
+
+		//extras for shading on the lower deck = 46 - 47
+		2, 2.5, 5,		0.9, 0.9, 0.4, 	0, 0, 1, //replaces 15
+		-2, 2.5, 5,		0.9, 0.9, 0.4, 	0, 0, 1, //replaces 18
 	};
 
 	GLuint elements[] = {
@@ -106,15 +112,15 @@ void Boat::InitModel() {
 		//LOWER DECK
 		//sides
 		15, 19, 14,
-		20, 15, 19,
+		20, 19, 46, //46 (replacement for 15)
 		20, 15, 16,
 		21, 20, 16,
 		21, 16, 17,
 		22, 21, 17,
 		22, 17, 18,
 		23, 22, 18,
-		23, 19, 18,
-		14, 18, 19,
+		23, 19, 47, //47 (replacement for 18)
+		19, 18, 14, 
 		//top
 		19, 20, 23,
 		20, 21, 22,
@@ -123,15 +129,15 @@ void Boat::InitModel() {
 		//TOP DECK
 		//sides
 		25, 29, 24,
-		30, 29, 25,
+		30, 29, 44, //44 (replacement for 25)
 		30, 26, 25,
 		31, 30, 42, //42 (replacement for 26)
 		31, 27, 26,
 		32, 31, 27,
 		32, 28, 43, //43 (replacement for 27)
 		33, 32, 28,
-		33, 29, 28,
-		29, 28, 24,
+		33, 29, 45, //45 (replacement for 28)
+		29, 28, 24, 
 		//top
 		29, 30, 33,
 		30, 31, 32,
@@ -274,6 +280,9 @@ void Boat::update(float dt) {
 		if (velocity.z < 0) velocity.z = 0;
 	}
 
+	//rotate the boat constantly for debug
+	//rotation.y = totalTime * 180;
+
 	//update transform
 	transform = glm::mat4(); //return to identity matrix
 
@@ -293,7 +302,7 @@ void Boat::stunSpin(float dt) {
 	float maxStunTime = 2.0f;
 
 	stunTimer += dt;
-	transform = glm::rotate(transform, glm::radians(720 * (stunTimer / maxStunTime)), glm::vec3(0,1,0));
+	transform = glm::rotate(transform, glm::radians(3 * 360 * (stunTimer / maxStunTime)), glm::vec3(0,1,0));
 
 	if (stunTimer > maxStunTime) {
 		isStunned = false;
