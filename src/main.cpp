@@ -29,9 +29,6 @@ using std::string;
 
 /*
 TO DO:
-- make 4 difficulty levels
-- tweak boat control feel
-- tweak boat knockback feel
 - drama controller
 	- test timing
 - storm effects
@@ -85,15 +82,15 @@ DifficultyLevel easy = {
 };
 
 DifficultyLevel hard = {
-	1, 1.5,
-	1, 1.5,
-	3
+	1, 1.3,
+	1, 2,
+	2
 };
 
 DifficultyLevel impossible = {
-	1, 1.5,
-	1, 1.5,
-	3
+	1.3, 1.6,
+	2, 3,
+	0
 };
 
 DifficultyLevel curDifficulty = easy;
@@ -106,9 +103,9 @@ Boat boat;
 
 glm::vec3 randomWaveStartingPosition(float waveHeight) {
 	float rad = glm::radians( (rand() % 360) * 1.0f );
-	std::cout << rad << std::endl;
+	//std::cout << rad << std::endl;
 	glm::vec3 unit = glm::vec3( cos(rad), 0, sin(rad) );
-	std::cout << unit.x << " " << unit.z << std::endl;
+	//std::cout << unit.x << " " << unit.z << std::endl;
 	glm::vec3 pos = glm::vec3( unit.x * 2, 0, unit.z * 3 );//unit * 3.0f;//5.0f;
 	pos += glm::vec3(unit.x * waveHeight * 3, 0, unit.z * waveHeight); //unit * waveHeight;
 
@@ -138,7 +135,7 @@ glm::vec3 waveToBoatVec3(glm::vec3 waveStart, Boat b) {
 }
 
 void startNewWave(DifficultyLevel difficulty) {
-	std::cout << "start new wave" << std::endl;
+	//std::cout << "start new wave" << std::endl;
 
 	float r1 = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 	float r2 = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);

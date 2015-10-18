@@ -454,7 +454,7 @@ bool Boat::testWaveCollision(glm::vec3 wavePos) {
 	float distX = std::abs(waveCollisionPos.x - boatCollisionPos.x);
 	float distZ = std::abs(waveCollisionPos.y - boatCollisionPos.y);
 
-	float magicNumber = 6 * scaleNormFactor; //stupid magic numbers to get wave size into boat space
+	float magicNumber = 7 * scaleNormFactor; //stupid magic numbers to get wave size into boat space
 	
 	if (distX < wavePos.y * magicNumber * 3 && distZ < wavePos.y * magicNumber) { 
 		
