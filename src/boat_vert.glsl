@@ -18,7 +18,7 @@ void main() {
 	float waveY = sin(waveOffset * 8) / 2;
 
 	//calculate the basic lighting
-	vec3 lightV = normalize(vec3(1,2,-1));
+	vec3 lightV = normalize(vec3(1.5,2,-1));
 	//vec3 mNorm = vec3(model * vec4(normal, 0));
 	vec3 mNorm = normalize( vec3(model * vec4(normal, 0)) );
 	float diffuse = max(dot(mNorm, lightV), 0.3);

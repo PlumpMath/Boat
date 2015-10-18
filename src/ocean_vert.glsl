@@ -37,7 +37,13 @@ void main()
 	}
 
 	//set the color
-	vec3 startColor = vec3(0.0, 0.5, 1.0);
+	vec3 startColor = vec3(0.0, 0.5, 1.0); //very blue
+	
+	//vec3 startColor = vec3(0.0, 0.7, 0.7); //green-ish
+	//vec3 startColor = vec3(0.0, 0.7, 0.8); //green-ish
+	
+	//startColor = vec3(0.0, 0.6, 0.7); //green-ish
+
 	color = startColor * diffuse;
 
 	//deform the mesh

@@ -408,7 +408,8 @@ void loop() {
 		}
 
 		// Clear the screen to black
-        glClearColor(0.3f, 0.7f, 1.0f, 1.0f);
+        glClearColor(0.3f, 0.7f, 1.0f, 1.0f); //light blue
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //depth buffer needs to be cleared for depth testing
 
 		//update & draw everything
