@@ -260,98 +260,161 @@ Boat::Boat() {
 
 	position.y = 1 * scaleNormFactor;
 	position.x = -15 * scaleNormFactor;
+	position.z = -35 * scaleNormFactor;
 	//transform = glm::translate(transform, glm::vec3(0, 1, 0));
 }
 
 void Boat::update(float dt) {
 	totalTime += dt;
 
-	//rotation
-	goalRotTimer += dt;
-	float timerLength = 1;
-	if (goalRotTimer > timerLength) {
-		rotation = goalRot;
+	float entranceTimerMax = 3;
+	if (entranceAnimationTimer < entranceTimerMax) {
+		if (startedEntranceAnimation) entranceAnimationTimer += dt;
+		position.z = ((entranceTimerMax - entranceAnimationTimer) / entranceTimerMax) * -35 * scaleNormFactor;
+
+		if (entranceAnimationTimer > 1.5 && (movingLeft || movingRight || movingForward || movingBack)) {
+			//skip animation
+			entranceAnimationTimer = 4;
+		}
+	}
+	else if (hasBoatSunk) {
+
+		sinkTimer += dt;
+
+		if (sinkTimer <= 15) {
+			position.y = ((sinkTimer) / 15.0f) * -30.0f;
+
+			goalRotTimer += dt;
+			float timerLength = 1;
+			if (goalRotTimer > timerLength) {
+				rotation = goalRot;
+			}
+			else {
+				rotation = startRot + ((goalRot - startRot) * (goalRotTimer / timerLength));
+			}
+		}
+		else if (sinkTimer > 15 && sinkTimer < 20) {
+			goalRotTimer = 0;
+			goalRot.z = 0;
+			goalRot.y = 0;
+			startRot = rotation;
+			position.y = -10;
+			position.x = -15 * scaleNormFactor;
+			position.z = 0;
+		}
+		else if (sinkTimer > 20) {
+
+			goalRotTimer += dt;
+			float timerLength = 1.5;
+			if (goalRotTimer > timerLength) {
+				rotation = goalRot;
+				position.y = 1;
+				hasBoatSunk = false;
+
+				velocity = glm::vec3(0,0,0);
+				movingLeft = false;
+				movingRight = false;
+				movingForward = false;
+				movingBack = false;
+			}
+			else {
+				rotation = startRot + ((goalRot - startRot) * (goalRotTimer / timerLength));
+			}
+
+			position.y = -5 + ( 6 * (goalRotTimer / timerLength) );
+		}
+		
 	}
 	else {
-		rotation = startRot + ((goalRot - startRot) * (goalRotTimer / timerLength));
-	}
-
-	//move
-	float accelFactor = 2;
-	float frictFactor = 0.4;
-
-	if (movingLeft) {
-		velocity.x += speed * accelFactor * dt;
-		velocity.x = std::min(velocity.x, speed);
-	}
-	else if (movingRight) {
-		velocity.x -= speed * accelFactor * dt;
-		velocity.x = std::max(velocity.x, -speed);
-	}
-	else { //friction
-		if (velocity.x != 0) {
-			float sign = (velocity.x / std::abs(velocity.x));
-			float newX = velocity.x - (speed * frictFactor * sign * dt);
-			if ( (newX < 0) != (velocity.x < 0) ) newX = 0;
-			velocity.x = newX;
+		//rotation
+		goalRotTimer += dt;
+		float timerLength = 1;
+		if (goalRotTimer > timerLength) {
+			rotation = goalRot;
 		}
-	}
-
-	if (movingForward) {
-		velocity.z += speed * accelFactor * dt;
-		velocity.z = std::min(velocity.z, speed);
-	}
-	else if (movingBack) {
-		velocity.z -= speed * accelFactor * dt;
-		velocity.z = std::max(velocity.z, -speed * 0.5f);
-	}
-	else { //friction
-		if (velocity.z != 0) {
-			float sign = (velocity.z / std::abs(velocity.z));
-			float newZ = velocity.z - (speed * frictFactor * sign * dt);
-			if ( (newZ < 0) != (velocity.z < 0) ) newZ = 0;
-			velocity.z = newZ;
+		else {
+			rotation = startRot + ((goalRot - startRot) * (goalRotTimer / timerLength));
 		}
+
+		//move
+		float accelFactor = 2;
+		float frictFactor = 0.4;
+
+		if (movingLeft) {
+			velocity.x += speed * accelFactor * dt;
+			velocity.x = std::min(velocity.x, speed);
+		}
+		else if (movingRight) {
+			velocity.x -= speed * accelFactor * dt;
+			velocity.x = std::max(velocity.x, -speed);
+		}
+		else { //friction
+			if (velocity.x != 0) {
+				float sign = (velocity.x / std::abs(velocity.x));
+				float newX = velocity.x - (speed * frictFactor * sign * dt);
+				if ( (newX < 0) != (velocity.x < 0) ) newX = 0;
+				velocity.x = newX;
+			}
+		}
+
+		if (movingForward) {
+			velocity.z += speed * accelFactor * dt;
+			velocity.z = std::min(velocity.z, speed);
+		}
+		else if (movingBack) {
+			velocity.z -= speed * accelFactor * dt;
+			velocity.z = std::max(velocity.z, -speed * 0.5f);
+		}
+		else { //friction
+			if (velocity.z != 0) {
+				float sign = (velocity.z / std::abs(velocity.z));
+				float newZ = velocity.z - (speed * frictFactor * sign * dt);
+				if ( (newZ < 0) != (velocity.z < 0) ) newZ = 0;
+				velocity.z = newZ;
+			}
+		}
+
+		//velocity
+		position += (velocity * dt);
+
+		//the current
+		position.z += -2 * dt;
+
+		//bounds
+		//std::cout << position.x << " " << position.z << std::endl;
+		float minBoundX = 30 * scaleNormFactor;
+		float maxBoundX = 60 * scaleNormFactor;
+		float posBoundZ = 20 * scaleNormFactor;
+		float negBoundZ = -20 * scaleNormFactor;
+
+		float deltaBoundZ = posBoundZ - negBoundZ;
+		float zNorm = (position.z + (-1 * negBoundZ)) / deltaBoundZ;
+
+		float deltaBoundX = maxBoundX - minBoundX;
+		float curBoundX = minBoundX + (deltaBoundX * zNorm);
+
+		if (position.x > curBoundX) {
+			position.x = curBoundX;
+			if (velocity.x > 0) velocity.x = 0;
+		}
+		if (position.x < -curBoundX) {
+			position.x = -curBoundX;
+			if (velocity.x < 0) velocity.x = 0;
+		}
+		if (position.z > posBoundZ) {
+			position.z = posBoundZ;
+			if (velocity.z > 0) velocity.z = 0;
+		}
+		if (position.z < negBoundZ) {
+			position.z = negBoundZ;
+			if (velocity.z < 0) velocity.z = 0;
+		}
+
+		//rotate the boat constantly for debug
+		//rotation.y = totalTime * 180;
+
+		
 	}
-
-	//velocity
-	position += (velocity * dt);
-
-	//the current
-	position.z += -2 * dt;
-
-	//bounds
-	//std::cout << position.x << " " << position.z << std::endl;
-	float minBoundX = 30 * scaleNormFactor;
-	float maxBoundX = 60 * scaleNormFactor;
-	float posBoundZ = 20 * scaleNormFactor;
-	float negBoundZ = -20 * scaleNormFactor;
-
-	float deltaBoundZ = posBoundZ - negBoundZ;
-	float zNorm = (position.z + (-1 * negBoundZ)) / deltaBoundZ;
-
-	float deltaBoundX = maxBoundX - minBoundX;
-	float curBoundX = minBoundX + (deltaBoundX * zNorm);
-
-	if (position.x > curBoundX) {
-		position.x = curBoundX;
-		if (velocity.x > 0) velocity.x = 0;
-	}
-	if (position.x < -curBoundX) {
-		position.x = -curBoundX;
-		if (velocity.x < 0) velocity.x = 0;
-	}
-	if (position.z > posBoundZ) {
-		position.z = posBoundZ;
-		if (velocity.z > 0) velocity.z = 0;
-	}
-	if (position.z < negBoundZ) {
-		position.z = negBoundZ;
-		if (velocity.z < 0) velocity.z = 0;
-	}
-
-	//rotate the boat constantly for debug
-	//rotation.y = totalTime * 180;
 
 	//update transform
 	transform = glm::mat4(); //return to identity matrix
@@ -367,6 +430,7 @@ void Boat::update(float dt) {
 		stunSpin(dt);
 	}
 }
+	
 
 void Boat::stunSpin(float dt) {
 	float maxStunTime = 2.0f;
@@ -380,7 +444,7 @@ void Boat::stunSpin(float dt) {
 }
 
 void Boat::onkeydown(string keyname) {
-	if (!isStunned) {
+	if (!isStunned && !hasBoatSunk) {
 		if (keyname == "Left" && !movingLeft) {
 			movingLeft = true;
 			movingRight = false;
@@ -404,7 +468,7 @@ void Boat::onkeydown(string keyname) {
 }
 
 void Boat::onkeyup(string keyname) {
-	if (!isStunned) {
+	if (!isStunned && !hasBoatSunk) {
 		if (keyname == "Left" && movingLeft) {
 			movingLeft = false;
 			untilt();
@@ -447,6 +511,30 @@ void Boat::tiltRight() {
 	goalRotTimer = 0;
 }
 
+
+void Boat::sinkTilt() {
+	startRot = rotation;
+	goalRot.z = 180;
+	goalRotTimer = 0;
+}
+
+void Boat::testBigWaveCollision(glm::vec3 wavePos) {
+	if (!hasBoatSunk) {
+		glm::vec2 boatCollisionPos = glm::vec2(position.x, position.z);
+		glm::vec2 waveCollisionPos = glm::vec2(wavePos.x * 4 * 8 * scaleNormFactor, wavePos.z * 8 * scaleNormFactor); //move wave into boat space
+		//float dist = glm::distance(boatCollisionPos, waveCollisionPos);
+		float distX = std::abs(waveCollisionPos.x - boatCollisionPos.x);
+		float distZ = std::abs(waveCollisionPos.y - boatCollisionPos.y);
+
+		float magicNumber = 7 * scaleNormFactor; //stupid magic numbers to get wave size into boat space
+		
+		if (distZ < wavePos.y * magicNumber) { 
+			hasBoatSunk = true;
+			sinkTilt();
+		}
+	}
+}
+
 bool Boat::testWaveCollision(glm::vec3 wavePos) {
 	glm::vec2 boatCollisionPos = glm::vec2(position.x, position.z);
 	glm::vec2 waveCollisionPos = glm::vec2(wavePos.x * 4 * 8 * scaleNormFactor, wavePos.z * 8 * scaleNormFactor); //move wave into boat space
@@ -479,6 +567,11 @@ bool Boat::testWaveCollision(glm::vec3 wavePos) {
 	}
 
 	return false;
+}
+
+void Boat::startEntranceAnimation() {
+	startedEntranceAnimation = true;
+	entranceAnimationTimer = 0;
 }
 
 void Boat::draw() {

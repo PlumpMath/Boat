@@ -18,6 +18,8 @@ class Boat {
 		void onkeydown(string keyname);
 		void onkeyup(string keyname);
 		bool testWaveCollision(glm::vec3 wavePos);
+		void startEntranceAnimation();
+		void testBigWaveCollision(glm::vec3 wavePos);
 		
 		glm::vec3 position;
 		glm::vec3 rotation;
@@ -46,8 +48,15 @@ class Boat {
 
 		float scaleNormFactor;
 
+		bool startedEntranceAnimation;
+		float entranceAnimationTimer;
+
+		bool hasBoatSunk;
+		float sinkTimer;
+
 		void untilt();
 		void tiltLeft();
 		void tiltRight();
+		void sinkTilt();
 		void stunSpin(float dt);
 };

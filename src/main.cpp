@@ -29,8 +29,6 @@ using std::string;
 
 /*
 TO DO:
-- drama controller
-	- test timing
 - storm effects
 	- lightning
 	- rain
@@ -66,13 +64,20 @@ glm::vec3 waveSpeed = glm::vec3(0,0,-1);
 bool didWaveHitPlayer = false;
 float waveDissapearTimer;
 float waveStartHeight;
+bool isTheBigOne = false;
+
+bool hasGameStarted = false;
 
 struct DifficultyLevel {
-	float minSize;
-	float maxSize;
-	float minSpeed;
-	float maxSpeed;
+	float minSize; float maxSize;
+	float minSpeed; float maxSpeed;
 	float timeBetweenWaves;
+};
+
+DifficultyLevel calm = {
+	0, 0,
+	0, 0,
+	0
 };
 
 DifficultyLevel easy = {
@@ -93,7 +98,24 @@ DifficultyLevel impossible = {
 	0
 };
 
-DifficultyLevel curDifficulty = easy;
+struct DramaUnit {
+	DifficultyLevel difficulty;
+	float time;
+};
+
+DramaUnit dramaticArc[] = 
+{
+	{calm, 20}, //slightly too long?
+	{easy, 40},
+	{calm, 25}, //slightly too short?
+	{hard, 60}, 
+	{impossible, 30}, //slightly too long?
+	{calm, 20}
+};
+int dramaIndex = 0;
+float dramaTimer = 0;
+ 
+DifficultyLevel curDifficulty = dramaticArc[dramaIndex].difficulty;
 
 bool betweenWaves = false;
 float betweenWavesTimer = 0;
@@ -132,6 +154,13 @@ glm::vec3 waveToBoatVec3(glm::vec3 waveStart, Boat b) {
 	toBoat = glm::normalize(toBoat);
 
 	return toBoat;
+}
+
+void startBigWave() {
+	wavePos = glm::vec3(0, 2.5, 5.5);
+	waveSpeed = glm::vec3(0, 0, -1);
+	didWaveHitPlayer = false;
+	isTheBigOne = true;
 }
 
 void startNewWave(DifficultyLevel difficulty) {
@@ -251,10 +280,25 @@ void ready() {
 	startNewWave(curDifficulty);
 }
 
+void dramaUpdate(float dt) {
+	dramaTimer += dt;
+
+	//std::cout << dramaTimer << std::endl;
+
+	if (dramaTimer > dramaticArc[dramaIndex].time && dramaIndex < 5) {
+		dramaIndex++;
+		curDifficulty = dramaticArc[dramaIndex].difficulty;
+		dramaTimer = 0;
+	}
+
+	if (!isTheBigOne && totalTime > 190) {
+		startBigWave();
+	}
+}
+
 void waveUpdate(float dt) {
 
-
-	if (betweenWaves) {
+	if (betweenWaves || wavePos.y == 0) { //second statement is a hack to move past calm periods
 
 		betweenWavesTimer += dt;
 		//std::cout <<  betweenWavesTimer << std::endl;
@@ -291,11 +335,16 @@ void waveUpdate(float dt) {
 			}
 		}
 		else { //check for wave collisions
-			didWaveHitPlayer = boat.testWaveCollision(wavePos);
+			if (isTheBigOne) {
+				boat.testBigWaveCollision(wavePos);
+			}
+			else {
+				didWaveHitPlayer = boat.testWaveCollision(wavePos);
 
-			if (didWaveHitPlayer) {
-				waveDissapearTimer = 0;
-				waveStartHeight = wavePos.y;
+				if (didWaveHitPlayer) {
+					waveDissapearTimer = 0;
+					waveStartHeight = wavePos.y;
+				}
 			}
 		}
 	}
@@ -335,6 +384,9 @@ void update(float dt) {
 
 	totalTime += dt;
 
+	if (hasGameStarted) {
+		dramaUpdate(dt);	
+	}
 	waveUpdate(dt);
 	boat.update(dt);
 	
@@ -350,8 +402,15 @@ void OnKeyDown(SDL_KeyboardEvent* key) {
 	string keyname = SDL_GetKeyName( key->keysym.sym );
 	//std::cout << "down " << keyname << std::endl;
 
-	boat.onkeydown(keyname);
+	if (hasGameStarted) {
+		boat.onkeydown(keyname);
 
+		if (keyname == "Space") startBigWave();
+	}
+	else {
+		hasGameStarted = true;
+		boat.startEntranceAnimation();
+	}
 	/*
 	if (keyname == "Space") {
 		wavePos = randomWaveStartingPosition(1);
