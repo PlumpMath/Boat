@@ -31,6 +31,8 @@ class Boat {
 		static GLint uniView;
 		static GLint uniModel;
 		static GLint uniWave;
+		static GLint uniStorminess;
+		static GLint uniLightning;
 
 		glm::mat4 transform;
 

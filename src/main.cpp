@@ -32,9 +32,7 @@ TO DO:
 - storm effects
 	- lightning
 	- rain
-	- lightning shaders
-	- wave intensity
-	- storm color shaders
+	- lightning shaders *
 - boat polish
 	- smoke
 	- wake
@@ -42,6 +40,17 @@ TO DO:
 - SFX
 - underwater quad
 - jumping fish?
+
+- difference between medium and hard isn't apparent *
+- need to fix the transitions (lightning?) *
+- wait time before last wave seems too long *
+- transitions in general aren't as tight as I'd like them to be *
+
+- ideas from meetup
+- - warning of wave direction *
+- - sailors that fall overboard
+- - the boat gets waterlogged the more it gets hit
+- - warning before final wave
 */
 
 glApp app;
@@ -58,6 +67,8 @@ GLint uniView;
 GLint uniModel;
 GLint uniWave;
 GLint uniBigWave;
+GLint uniStorminess;
+GLint uniLightning;
 
 glm::vec3 wavePos = glm::vec3(0,1,3);
 glm::vec3 waveSpeed = glm::vec3(0,0,-1);
@@ -105,12 +116,12 @@ struct DramaUnit {
 
 DramaUnit dramaticArc[] = 
 {
+	{calm, 15},
+	{easy, 50},
 	{calm, 20}, //slightly too long?
-	{easy, 40},
-	{calm, 25}, //slightly too short?
 	{hard, 60}, 
 	{impossible, 30}, //slightly too long?
-	{calm, 20}
+	{calm, 20} //slightly too long?
 };
 int dramaIndex = 0;
 float dramaTimer = 0;
@@ -120,6 +131,10 @@ DifficultyLevel curDifficulty = dramaticArc[dramaIndex].difficulty;
 bool betweenWaves = false;
 float betweenWavesTimer = 0;
 float totalTime = 0;
+
+float storminess = 1;
+float lightningTimer = 8; //time since last lightning strike
+float waveTimer = 0;
 
 Boat boat;
 
@@ -271,6 +286,8 @@ void ready() {
 	uniModel = glGetUniformLocation(shader.program, "model");
 	uniWave = glGetUniformLocation(shader.program, "waveOffset");
 	uniBigWave = glGetUniformLocation(shader.program, "bigWavePos");
+	uniStorminess = glGetUniformLocation(shader.program, "storminess");
+	uniLightning = glGetUniformLocation(shader.program, "lightningTimer");
 
 	glBindVertexArray(0);
 
@@ -294,9 +311,33 @@ void dramaUpdate(float dt) {
 	if (!isTheBigOne && totalTime > 190) {
 		startBigWave();
 	}
+	
+	lightningTimer += dt;
+
+	/*
+	if (totalTime < 80) {
+		storminess = 0;
+	}
+	else if (totalTime < 85) {
+		storminess = (totalTime - 80) / 5;
+	}
+	else if (totalTime < 210) {
+		storminess = 1;
+	}
+	else if (totalTime < 215) {
+		storminess = (5 - (totalTime - 210)) / 5;
+	}
+	else {
+		storminess = 0;
+	}
+	*/
+	
+	
 }
 
 void waveUpdate(float dt) {
+	//waveTimer = (waveTimer + dt);
+	//if (waveTimer > 5) waveTimer -= 5;
 
 	if (betweenWaves || wavePos.y == 0) { //second statement is a hack to move past calm periods
 
@@ -365,8 +406,12 @@ void drawOcean() {
 	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
 
 	glUniform1f(uniWave, totalTime * 0.2f);
+	//glUniform1f(uniWave, waveTimer * 0.2f);
 
 	glUniform3fv(uniBigWave, 1, glm::value_ptr(wavePos));
+
+	glUniform1f(uniStorminess, storminess);
+	glUniform1f(uniLightning, lightningTimer);
 	
 	//draw
 	glDrawElements(GL_TRIANGLES, (verticesPerSide - 1) * (verticesPerSide - 1) * 2 * 3, GL_UNSIGNED_INT, 0);	
@@ -384,9 +429,11 @@ void update(float dt) {
 
 	totalTime += dt;
 
+	
 	if (hasGameStarted) {
 		dramaUpdate(dt);	
 	}
+	
 	waveUpdate(dt);
 	boat.update(dt);
 	
@@ -405,7 +452,9 @@ void OnKeyDown(SDL_KeyboardEvent* key) {
 	if (hasGameStarted) {
 		boat.onkeydown(keyname);
 
-		if (keyname == "Space") startBigWave();
+		if (keyname == "Space") {
+			lightningTimer = 0;
+		}
 	}
 	else {
 		hasGameStarted = true;
@@ -463,8 +512,32 @@ void loop() {
 			}
 		}
 
-		// Clear the screen to black
-        glClearColor(0.3f, 0.7f, 1.0f, 1.0f); //light blue
+		// Clear the screen
+		glm::vec3 skyColor = glm::vec3(0.3, 0.7, 1.0);
+		glm::vec3 stormColor = glm::vec3(0.1, 0.15, 0.25);
+		glm::vec3 curColor = skyColor + (storminess * (stormColor - skyColor));
+
+		if (lightningTimer < 0.3) {
+			curColor = glm::vec3(1,1,1);	
+		}
+		else if (lightningTimer < 3) {
+			glm::vec3 lightningColor = glm::vec3(0,0,0);
+			if (lightningTimer < 1) {
+				float lightningDelta = (lightningTimer - 0.3) / 0.7;
+				curColor = glm::vec3(1,1,1) + ((lightningColor - glm::vec3(1,1,1)) * lightningDelta);
+			}
+			else if (lightningTimer > 2) {
+				float lightningDelta = 1 - ((lightningTimer - 2) / 1);
+				curColor = curColor + ((lightningColor - curColor) * lightningDelta);
+			}
+			else {
+				curColor = lightningColor;
+			}
+		}
+
+        //glClearColor(0.3f, 0.7f, 1.0f, 1.0f); //light blue
+        //glClearColor(0.1, 0.15, 0.25, 1); //dark blue grey
+        glClearColor(curColor.x, curColor.y, curColor.z, 1);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //depth buffer needs to be cleared for depth testing
 

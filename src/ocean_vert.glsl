@@ -7,16 +7,22 @@ uniform mat4 view;
 uniform mat4 model;
 uniform float waveOffset;
 uniform vec3 bigWavePos;
+uniform float storminess;
+uniform float lightningTimer;
 
 flat out vec3 color;
 //flat varying vec3 color;
 
 void main()
 {
+	//float storminess = 1;
+	//storm factors
+	float s1 = 1 + (min(1, storminess * 5) * 0.7);
+	float s2 = 1 + (storminess * 0.5);
 
 	//a bunch of magical sine wave variables for all the different wave effects
 	float waveY = sin((waveOffset + position.z) * 8) / 8;
-	float waveZ = sin((waveOffset + position.x) * 8) / 8;
+	float waveZ = sin((waveOffset + position.x) * 8 * s1) / 8;
 	float waveNormY = (1 + sin((waveOffset + position.z) * 8)) * 0.5;
 	float waveNormZ = sin((waveOffset + 1 + position.z) * 8);
 
@@ -38,15 +44,34 @@ void main()
 
 	//set the color
 	vec3 startColor = vec3(0.0, 0.5, 1.0); //very blue
-	
-	//vec3 startColor = vec3(0.0, 0.7, 0.7); //green-ish
-	//vec3 startColor = vec3(0.0, 0.7, 0.8); //green-ish
-	
-	//startColor = vec3(0.0, 0.6, 0.7); //green-ish
+	vec3 stormColor = vec3(0.2, 0.3, 0.5);
+	vec3 curColor = startColor + ((stormColor - startColor) * storminess);
+	color = curColor * diffuse;
 
-	color = startColor * diffuse;
+	if (lightningTimer < 0.3) {
+		color = vec3(1,1,1);	
+	}
+	else if (lightningTimer < 3) {
+		vec3 lightningColor = vec3(1,1,1);
+
+		if (diffuse < 1) {
+			lightningColor = vec3(0,0,0);
+		}
+
+		if (lightningTimer < 1) {
+			float lightningDelta = (lightningTimer - 0.3) / 0.7;
+			color = vec3(1,1,1) + ((lightningColor - vec3(1,1,1)) * lightningDelta);
+		}
+		else if (lightningTimer > 2) {
+			float lightningDelta = 1 - ((lightningTimer - 2) / 1);
+			color = color + ((lightningColor - color) * lightningDelta);
+		}
+		else {
+			color = lightningColor;
+		}
+	} 
 
 	//deform the mesh
-	vec3 newPos = position + vec3(0, waveY, waveZ) + bigWaveFactor;
+	vec3 newPos = position + vec3(0, waveY * s2, waveZ * s2) + bigWaveFactor;
 	gl_Position = proj * view * model * vec4(newPos, 1.0);
 }

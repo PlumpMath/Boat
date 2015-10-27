@@ -9,6 +9,8 @@ GLint Boat::uniProj;
 GLint Boat::uniView;
 GLint Boat::uniModel;
 GLint Boat::uniWave;
+GLint Boat::uniStorminess;
+GLint Boat::uniLightning;
 
 //static functions
 void Boat::InitModel() {
@@ -244,6 +246,8 @@ void Boat::InitModel() {
 	Boat::uniView = glGetUniformLocation(Boat::model.shader.program, "view");
 	Boat::uniModel = glGetUniformLocation(Boat::model.shader.program, "model");
 	Boat::uniWave = glGetUniformLocation(Boat::model.shader.program, "waveOffset");
+	Boat::uniStorminess = glGetUniformLocation(Boat::model.shader.program, "storminess");
+	Boat::uniLightning = glGetUniformLocation(Boat::model.shader.program, "lightningTimer");
 }
 
 void Boat::DestroyModel() {
@@ -523,7 +527,7 @@ void Boat::testBigWaveCollision(glm::vec3 wavePos) {
 		glm::vec2 boatCollisionPos = glm::vec2(position.x, position.z);
 		glm::vec2 waveCollisionPos = glm::vec2(wavePos.x * 4 * 8 * scaleNormFactor, wavePos.z * 8 * scaleNormFactor); //move wave into boat space
 		//float dist = glm::distance(boatCollisionPos, waveCollisionPos);
-		float distX = std::abs(waveCollisionPos.x - boatCollisionPos.x);
+		//float distX = std::abs(waveCollisionPos.x - boatCollisionPos.x);
 		float distZ = std::abs(waveCollisionPos.y - boatCollisionPos.y);
 
 		float magicNumber = 7 * scaleNormFactor; //stupid magic numbers to get wave size into boat space
@@ -582,6 +586,9 @@ void Boat::draw() {
 
 	//wave effect
 	glUniform1f(uniWave, totalTime * 0.5f);
+
+	glUniform1f(uniStorminess, storminess);
+	glUniform1f(uniLightning, lightningTimer);
 
 	//update camera
 	glUniformMatrix4fv(Boat::uniView, 1, GL_FALSE, glm::value_ptr(camera.view));
