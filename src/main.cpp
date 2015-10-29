@@ -30,27 +30,20 @@ using std::string;
 /*
 TO DO:
 - storm effects
-	- lightning
 	- rain
-	- lightning shaders *
 - boat polish
 	- smoke
 	- wake
 - lighthouse model
-- SFX
+- SFX + soundtrack
 - underwater quad
 - jumping fish?
-
-- difference between medium and hard isn't apparent *
-- need to fix the transitions (lightning?) *
-- wait time before last wave seems too long *
-- transitions in general aren't as tight as I'd like them to be *
 
 - ideas from meetup
 - - warning of wave direction *
 - - sailors that fall overboard
 - - the boat gets waterlogged the more it gets hit
-- - warning before final wave
+- - warning before final wave *
 */
 
 glApp app;
@@ -97,24 +90,10 @@ DifficultyLevel easy = {
 	3
 };
 
-/*
-DifficultyLevel hard = {
-	1, 1.3,
-	1, 2,
-	2
-};
-
-DifficultyLevel impossible = {
-	1.3, 1.6,
-	2, 3,
-	0
-};
-*/
-
 DifficultyLevel medium = {
 	1, 1.3,
-	1, 2,
-	2
+	1, 1.5,
+	2.5
 };
 
 DifficultyLevel hard = {
@@ -134,27 +113,15 @@ struct DramaUnit {
 	float time;
 };
 
-/*
 DramaUnit dramaticArc[] = 
 {
+	{calm, 10},
+	{easy, 40},
 	{calm, 15},
-	{easy, 50},
-	{calm, 20}, //slightly too long?
-	{hard, 60}, 
-	{impossible, 30}, //slightly too long?
-	{calm, 20} //slightly too long?
-};
-*/
-
-DramaUnit dramaticArc[] = 
-{
-	{calm, 15},
-	{easy, 40}, //probably too long
-	{calm, 10}, //maybe too long?
-	{medium, 50}, //maybe too short??
-	{hard, 30}, //too short (+ not enough of a difference)
-	{impossible, 20}, //too long
-	{calm, 20} //not enough of a gap between The Big One??
+	{medium, 40}, //too hard sometimes? 
+	{hard, 30},
+	{impossible, 20},
+	{calm, 20}
 };
 
 int dramaIndex = 0;
@@ -170,6 +137,7 @@ float storminess = 0;
 float lightningTimer = 8; //time since last lightning strike
 int lightningStrikeCounter = 0;
 float timeBetweenLightning;
+bool doesLightningStrikeOnWaveCollision = false;
 float waveTimer = 0;
 
 Boat boat;
@@ -335,7 +303,7 @@ void ready() {
 
 void dramaUpdate(float dt) {
 	dramaTimer += dt;
-
+	//std::cout << dramaTimer << std::endl;
 
 	float startOfStormTime = (dramaticArc[0].time + dramaticArc[1].time + dramaticArc[2].time);
 	float hardModeTime = (dramaticArc[0].time + dramaticArc[1].time + dramaticArc[2].time + 
@@ -352,36 +320,25 @@ void dramaUpdate(float dt) {
 
 	//if (dramaTimer > dramaticArc[dramaIndex].time && dramaIndex < 5) {
 	if (dramaTimer > dramaticArc[dramaIndex].time && dramaIndex < 6) {
+		//std::cout << "next difficulty!!!" << std::endl;
 		dramaIndex++;
 		curDifficulty = dramaticArc[dramaIndex].difficulty;
 		dramaTimer = 0;
+
+		//make the current wave dissapear
+		didWaveHitPlayer = true;
+		waveDissapearTimer = 0;
+		waveStartHeight = wavePos.y;
 	}
 
 	if (!isTheBigOne && totalTime > (endOfStormTime - 5)) {
+		//std::cout << "HERE IT COMES " << std::endl;
 		startBigWave();
 	}
 	
 	
 
 	//storminess
-	/*
-	if (totalTime < 80) {
-		storminess = 0;
-	}
-	else if (totalTime < 85) {
-		storminess = (totalTime - 80) / 5;
-	}
-	else if (totalTime < 210) {
-		storminess = 1;
-	}
-	else if (totalTime < 215) {
-		storminess = (5 - (totalTime - 210)) / 5;
-	}
-	else {
-		storminess = 0;
-	}*/
-
-	//IN PROGRESS
 	if (totalTime < startOfStormTime - 5) {
 		storminess = 0;
 	}
@@ -398,8 +355,11 @@ void dramaUpdate(float dt) {
 		storminess = 0;
 	}
 
+
+	//lightning
 	lightningTimer += dt;
-	if (totalTime > (startOfStormTime - 2.51) && totalTime < startOfStormTime) { //start of storm
+	//if (totalTime > (startOfStormTime - 2.51) && totalTime < startOfStormTime) { //start of storm
+	if (totalTime > startOfStormTime && totalTime < (startOfStormTime + 1)) {
 		if (lightningStrikeCounter < 1) {
 			lightningTimer = 0;
 			lightningStrikeCounter++;
@@ -411,127 +371,44 @@ void dramaUpdate(float dt) {
 			lightningStrikeCounter++;
 		}
 	}
-	else if (totalTime > impossibleModeTime && totalTime < (impossibleModeTime + 5)) { //start of third wave
+	//else if (totalTime > impossibleModeTime && totalTime < (impossibleModeTime + 5)) { //start of third wave
+	else if (totalTime > (impossibleModeTime - 1) && totalTime < impossibleModeTime) { //start of third wave
 		if (lightningStrikeCounter < 3) {
 			lightningTimer = 0;
 			lightningStrikeCounter++;
-
-			timeBetweenLightning = (2 + (rand() % 5)) * 1.0f;
+			//timeBetweenLightning = (2 + (rand() % 5)) * 1.0f;
 		}
 	}
-	else if (totalTime > (impossibleModeTime + 5) && totalTime < (fakeCalmTime - 5)) { //third wave
+	else if (totalTime > impossibleModeTime && totalTime < (fakeCalmTime - 5)) { //third wave
+		doesLightningStrikeOnWaveCollision = true;
+		lightningTimer += dt; //double the speed of lightning in this period
+
+		/*
 		timeBetweenLightning -= dt;
 
 		if (timeBetweenLightning <= 0) {
 			lightningTimer = 0;
-			timeBetweenLightning = (4 + (rand() % 5)) * 1.0f;
+			timeBetweenLightning = (3 + (rand() % 4)) * 1.0f;
 			//NOTE: this works ok. other possible ideas: 
 			//lightning every time the boat gets hit, 
 			//lightning every time a wave starts
 		}
+		*/
 	}
 	else if (totalTime > fakeCalmTime && totalTime < (fakeCalmTime + 5)) { //end of third wave
+		doesLightningStrikeOnWaveCollision = false;
 		if (lightningStrikeCounter < 4) {
 			lightningTimer = 0;
 			lightningStrikeCounter++;
 		}
 	}
-	else if (totalTime > (endOfStormTime + 20 - 2.51) && totalTime < (endOfStormTime + 25)) { //end of storm
+	//else if (totalTime > (endOfStormTime + 20 - 2.51) && totalTime < (endOfStormTime + 25)) { //end of storm
+	else if (totalTime > (endOfStormTime + 20 - 5) && totalTime < (endOfStormTime + 25)) { //end of storm
 		if (lightningStrikeCounter < 5) {
 			lightningTimer = 0;
 			lightningStrikeCounter++;
 		}
-	}
-
-	//lightning strikes
-	/*
-	lightningTimer += dt;
-	if (totalTime > 82.49 && totalTime < 85) {
-		if (lightningStrikeCounter < 1) {
-			lightningTimer = 0;
-			lightningStrikeCounter++;
-		}
-	}
-	else if (totalTime > 145 && totalTime < 150) {
-		if (lightningStrikeCounter < 2) {
-			lightningTimer = 0;
-			lightningStrikeCounter++;
-
-			timeBetweenLightning = (2 + (rand() % 5)) * 1.0f;
-		}
-	}
-	else if (totalTime > 150 && totalTime < 175) {
-		timeBetweenLightning -= dt;
-
-		if (timeBetweenLightning <= 0) {
-			lightningTimer = 0;
-			timeBetweenLightning = (4 + (rand() % 5)) * 1.0f;
-			//NOTE: this works ok. other possible ideas: 
-			//lightning every time the boat gets hit, 
-			//lightning every time a wave starts
-		}
-	}
-	else if (totalTime > 180 && totalTime < 185) {
-		if (lightningStrikeCounter < 3) {
-			lightningTimer = 0;
-			lightningStrikeCounter++;
-		}
-	}
-	else if (totalTime > 212.49 && totalTime < 220) {
-		if (lightningStrikeCounter < 4) {
-			lightningTimer = 0;
-			lightningStrikeCounter++;
-		}
-	}
-	*/
-
-	/*
-	lightningTimer += dt;
-	if (totalTime > 82.49 && totalTime < 85) { //start of storm
-		if (lightningStrikeCounter < 1) {
-			lightningTimer = 0;
-			lightningStrikeCounter++;
-		}
-	}
-	else if (totalTime > 120 && totalTime < 125) { //start of second wave
-		if (lightningStrikeCounter < 2) {
-			lightningTimer = 0;
-			lightningStrikeCounter++;
-		}
-	}
-	else if (totalTime > 145 && totalTime < 150) { //start of third wave
-		if (lightningStrikeCounter < 3) {
-			lightningTimer = 0;
-			lightningStrikeCounter++;
-
-			timeBetweenLightning = (2 + (rand() % 5)) * 1.0f;
-		}
-	}
-	else if (totalTime > 150 && totalTime < 175) { //third wave
-		timeBetweenLightning -= dt;
-
-		if (timeBetweenLightning <= 0) {
-			lightningTimer = 0;
-			timeBetweenLightning = (4 + (rand() % 5)) * 1.0f;
-			//NOTE: this works ok. other possible ideas: 
-			//lightning every time the boat gets hit, 
-			//lightning every time a wave starts
-		}
-	}
-	else if (totalTime > 180 && totalTime < 185) { //end of third wave
-		if (lightningStrikeCounter < 4) {
-			lightningTimer = 0;
-			lightningStrikeCounter++;
-		}
-	}
-	else if (totalTime > 212.49 && totalTime < 220) { //end of storm
-		if (lightningStrikeCounter < 5) {
-			lightningTimer = 0;
-			lightningStrikeCounter++;
-		}
-	}
-	*/
-	
+	}	
 }
 
 void waveUpdate(float dt) {
@@ -584,6 +461,10 @@ void waveUpdate(float dt) {
 				if (didWaveHitPlayer) {
 					waveDissapearTimer = 0;
 					waveStartHeight = wavePos.y;
+
+					if (doesLightningStrikeOnWaveCollision) {
+						lightningTimer = 0;
+					}
 				}
 			}
 		}
@@ -628,6 +509,9 @@ void update(float dt) {
 
 	totalTime += dt;
 
+	//make the camera bob
+	glm::mat4 tmpView = camera.view;
+	camera.view = glm::translate(camera.view, glm::vec3(0, 0.1 + (sin(totalTime) * 0.1), 0));
 	
 	if (hasGameStarted) {
 		dramaUpdate(dt);	
@@ -638,6 +522,8 @@ void update(float dt) {
 	
 	boat.draw();
 	drawOcean();
+
+	camera.view = tmpView; //hack to keep base camera view stored
 }
 
 void on_quit() {
@@ -651,9 +537,11 @@ void OnKeyDown(SDL_KeyboardEvent* key) {
 	if (hasGameStarted) {
 		boat.onkeydown(keyname);
 
+		/*
 		if (keyname == "Space") {
 			lightningTimer = 0;
 		}
+		*/
 	}
 	else {
 		hasGameStarted = true;

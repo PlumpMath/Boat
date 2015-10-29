@@ -19,7 +19,7 @@ void main()
 	//storm factors
 	//float s1 = 1 + (min(1, storminess * 5 * 3) * 0.7);
 	float s1 = 1;
-	if (storminess > 0.5) {
+	if (storminess >= 1) {
 		s1 = 1.7;
 	}
 	float s2 = 1 + (storminess * 0.5);
