@@ -297,7 +297,7 @@ void Boat::update(float dt) {
 				rotation = startRot + ((goalRot - startRot) * (goalRotTimer / timerLength));
 			}
 		}
-		else if (sinkTimer > 15 && sinkTimer < 20) {
+		else if (sinkTimer > 15 && sinkTimer < 30) {
 			goalRotTimer = 0;
 			goalRot.z = 0;
 			goalRot.y = 0;
@@ -306,7 +306,7 @@ void Boat::update(float dt) {
 			position.x = -15 * scaleNormFactor;
 			position.z = 0;
 		}
-		else if (sinkTimer > 20) {
+		else if (sinkTimer > 30) {
 
 			goalRotTimer += dt;
 			float timerLength = 1.5;

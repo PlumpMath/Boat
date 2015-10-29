@@ -17,7 +17,11 @@ void main()
 {
 	//float storminess = 1;
 	//storm factors
-	float s1 = 1 + (min(1, storminess * 5) * 0.7);
+	//float s1 = 1 + (min(1, storminess * 5 * 3) * 0.7);
+	float s1 = 1;
+	if (storminess > 0.5) {
+		s1 = 1.7;
+	}
 	float s2 = 1 + (storminess * 0.5);
 
 	//a bunch of magical sine wave variables for all the different wave effects
