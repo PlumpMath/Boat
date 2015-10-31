@@ -13,7 +13,7 @@ GLint Flag::uniLightning;
 
 void Flag::InitModel() {
 	GLfloat vertices[] = {
-		//x, y, z,	r, g, b,
+		//x, y, z,
 		//top = 0 - 10
 		0, 4, 0, 
 		0, 3.6, -1, 

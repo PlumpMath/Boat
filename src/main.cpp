@@ -28,6 +28,7 @@ using std::string;
 #include "Camera.h"
 #include "Boat.h"
 #include "Flag.h"
+#include "lighthouse.h"
 
 
 /*
@@ -41,18 +42,11 @@ TO DO:
 - SFX + soundtrack
 - jumping fish?
 
-!!! keep an eye on the wave clean up code... it might cause bugs
-//^^^ this seems to be working ok
-
 - ideas from meetup
-- - warning of wave direction *
 - - sailors that fall overboard
 - - the boat gets waterlogged the more it gets hit
-- - warning before final wave *
-
 
 big to dos:
-- flag
 - lighthouse
 
 medium to dos:
@@ -163,6 +157,7 @@ float waveTimer = 0;
 
 Boat boat;
 Flag flag;
+Lighthouse lighthouse;
 
 glm::vec3 randomWaveStartingPosition(float waveHeight) {
 	float rad = glm::radians( (rand() % 360) * 1.0f );
@@ -323,6 +318,8 @@ void ready() {
 	Boat::InitModel();
 
 	Flag::InitModel();
+
+	Lighthouse::InitModel();
 
 	//random wave
 	startNewWave(curDifficulty);
@@ -554,7 +551,9 @@ void update(float dt) {
 	waveUpdate(dt);
 	boat.update(dt);
 	flag.update(dt, boat.flagAnchorPoint(), boat.rotation);	
+	lighthouse.update(dt);
 
+	lighthouse.draw();
 	flag.draw();
 	boat.draw();
 	drawOcean();
@@ -565,6 +564,7 @@ void update(float dt) {
 void on_quit() {
 	Boat::DestroyModel();
 	Flag::DestroyModel();
+	Lighthouse::DestroyModel();
 	//destroy the ocean model???
 }
 
