@@ -1,12 +1,15 @@
 #include "Flag.h"
 
 #include <iostream>
+#include <algorithm> 
 
 glModelData Flag::model;
 GLint Flag::uniProj;
 GLint Flag::uniView;
 GLint Flag::uniModel;
 GLint Flag::uniWave;
+GLint Flag::uniStorm;
+GLint Flag::uniLightning;
 
 void Flag::InitModel() {
 	GLfloat vertices[] = {
@@ -72,6 +75,8 @@ void Flag::InitModel() {
 	Flag::uniView = glGetUniformLocation(Flag::model.shader.program, "view");
 	Flag::uniModel = glGetUniformLocation(Flag::model.shader.program, "model");
 	Flag::uniWave = glGetUniformLocation(Flag::model.shader.program, "waveOffset");
+	Flag::uniStorm = glGetUniformLocation(Flag::model.shader.program, "storminess");
+	Flag::uniLightning = glGetUniformLocation(Flag::model.shader.program, "lightningTimer");
 
 	std::cout << "build flag!!!" << std::endl;
 	std::cout << "uni proj " << Flag::uniProj << std::endl;
@@ -85,7 +90,7 @@ void Flag::DestroyModel() {
 Flag::Flag() {
 	std::cout << "init flag!!!" << std::endl;
 
-	scale = glm::vec3(0.02, 0.01, 0.02);
+	scale = glm::vec3(0.02, 0.01, 0.01);
 }
 
 void Flag::update(float dt, glm::vec3 anchorPos, glm::vec3 anchorRot) {
@@ -93,6 +98,9 @@ void Flag::update(float dt, glm::vec3 anchorPos, glm::vec3 anchorRot) {
 
 	if (rotTimer > 0) {
 		rotTimer -= dt;
+
+		stiffnessTimer += dt * 2; //extend the flag
+		if (stiffnessTimer > 2) stiffnessTimer = 2; //keep things reasonable
 	
 		curRotY = prevRotY + ( (nextRotY - prevRotY) * (1 - rotTimer) );
 	}
@@ -101,37 +109,43 @@ void Flag::update(float dt, glm::vec3 anchorPos, glm::vec3 anchorRot) {
 		prevRotY = nextRotY;
 	}
 
-	/*
-	transform = glm::rotate(
-			transform,
-			-1.0f * 0.05f * dt * glm::radians(180.0f),
-			glm::vec3(0.0f, 1.0f, 0.0f)
-		);
-		*/
+	if (isAttachedToBoat) {
 
-	//std::cout << anchorPos.x << std::endl;
-	//std::cout << anchorPos.z << std::endl;
+		if (stiffnessTimer > 0 && rotTimer <= 0) {
+			stiffnessTimer -= dt;
+			if (stiffnessTimer <= 0) {
+				stiffnessTimer = 0;
+			}
+		}
 
-	float bobWithBoat = (0.06 * (1 + storminess) * sin(totalTime * 0.5 * 8) / 2); //MAGIC!!! (doesn't work during storm)
-	//position = glm::vec3( (anchorPos.x * 0.06), 0.7 + bobWithBoat, (anchorPos.z * 0.06) + 0.3); //follow boat around
-	
-	position = anchorPos;
-	position.y += bobWithBoat;
-	position.y += 0.05;
+		float bobWithBoat = (0.06 * (1 + storminess) * sin(totalTime * 0.5 * 8) / 2); //lotsa magic numbers
+		
+		position = anchorPos;
+		position.y += bobWithBoat;
+		position.y += 0.05;
 
-	rotation = anchorRot; //currently doesn't work for stun spins :(
-	rotation.y += curRotY;
+		rotation = anchorRot; //currently doesn't work for stun spins :(
+		rotation.y += curRotY;
+	}
+	else {
+		position += glm::vec3(2,0.5,-0.5) * dt;
+
+		rotation = glm::vec3(0,0,0);
+		rotation.y += curRotY;
+	}
 
 	//update transform
 	transform = glm::mat4(); //return to identity matrix
 
+	
 	transform = glm::translate(transform, position); //position
-	transform = glm::scale(transform, scale); //scale
 
 	//rotation
 	transform = glm::rotate(transform, glm::radians(rotation.x), glm::vec3(1,0,0));
 	transform = glm::rotate(transform, glm::radians(rotation.y), glm::vec3(0,1,0));
 	transform = glm::rotate(transform, glm::radians(rotation.z), glm::vec3(0,0,1));
+
+	transform = glm::scale( transform, glm::vec3( scale.x, scale.y, scale.z * ( 1 + ((stiffnessTimer / 2)*2) ) )); //scale
 
 }
 
@@ -154,8 +168,10 @@ void Flag::draw() {
 	//update transform
 	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(transform));
 
-	//wave effect
+	//special effects
 	glUniform1f(uniWave, totalTime);
+	glUniform1f(uniStorm, storminess);
+	glUniform1f(uniLightning, lightningTimer);
 
 	drawModel(Flag::model);
 }

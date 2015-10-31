@@ -17,12 +17,16 @@ class Flag {
 		glm::vec3 rotation;
 		glm::vec3 scale;
 
+		bool isAttachedToBoat = true;
+
 	private:
 		static glModelData model;
 		static GLint uniProj;
 		static GLint uniView;
 		static GLint uniModel;
 		static GLint uniWave;
+		static GLint uniStorm;
+		static GLint uniLightning;
 
 		glm::mat4 transform;
 
@@ -31,4 +35,7 @@ class Flag {
 		//rotation
 		float prevRotY, nextRotY, curRotY;
 		float rotTimer;
+
+		//extension
+		float stiffnessTimer;
 };

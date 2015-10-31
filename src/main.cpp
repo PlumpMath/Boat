@@ -218,8 +218,7 @@ void startNewWave(DifficultyLevel difficulty) {
 	waveSpeed = toBoat * speed;
 	wavePos.y = height;
 
-	std::cout << toBoat.z << std::endl;
-	flag.setRotYGoal( atan2(-toBoat.z, -toBoat.x) * (180 / PI) );
+	flag.setRotYGoal( (atan2(toBoat.x, toBoat.z) * (180 / PI)) + 180 );
 
 	didWaveHitPlayer = false;
 }
@@ -358,6 +357,12 @@ void dramaUpdate(float dt) {
 		didWaveHitPlayer = true;
 		waveDissapearTimer = 0;
 		waveStartHeight = wavePos.y;
+	}
+
+	//send the flag flying away
+	if (totalTime > (endOfStormTime - 10) && flag.isAttachedToBoat) {
+		flag.setRotYGoal( 270 );
+		flag.isAttachedToBoat = false;
 	}
 
 	if (!isTheBigOne && totalTime > (endOfStormTime - 5)) {
@@ -576,9 +581,12 @@ void OnKeyDown(SDL_KeyboardEvent* key) {
 		}
 		*/
 
+		/*
 		if (keyname == "Space") {
-			flag.setRotYGoal( (rand() % 360) * 1.0f );
+			flag.setRotYGoal( 270 );
+			flag.isAttachedToBoat = false;
 		}
+		*/
 	}
 	else {
 		hasGameStarted = true;

@@ -593,9 +593,8 @@ void Boat::draw() {
 	glBindVertexArray(Boat::model.vao);
 	glUseProgram(Boat::model.shader.program); //only the shader is necessary for uniforms
 
-	//wave effect
+	//special effects
 	glUniform1f(uniWave, totalTime * 0.5f);
-
 	glUniform1f(uniStorminess, storminess);
 	glUniform1f(uniLightning, lightningTimer);
 
