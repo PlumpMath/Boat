@@ -14,94 +14,94 @@ void Lighthouse::InitModel() {
 		//x, y, z,	r, g, b,
 
 		//0
-		10, 0, 0,
-		5, 0, -10,
-		-5, 0, -10,
-		-10, 0, 0,
-		-5, 0, 10,
-		5, 0, 10,
+		10, 0, 0,		1, 1, 1,
+		5, 0, -10,		1, 1, 1,
+		-5, 0, -10,		1, 1, 1,
+		-10, 0, 0,		1, 1, 1,
+		-5, 0, 10,		1, 1, 1,
+		5, 0, 10,		1, 1, 1,
 		//6
-		10, 8, 0,
-		5, 8, -10,
-		-5, 8, -10,
-		-10, 8, 0,
-		-5, 8, 10,
-		5, 8, 10,
+		10, 8, 0,		1, 1, 1,
+		5, 8, -10,		1, 1, 1,
+		-5, 8, -10,		1, 1, 1,
+		-10, 8, 0,		1, 1, 1,
+		-5, 8, 10,		1, 1, 1,
+		5, 8, 10,		1, 1, 1,
 
 		//12
-		8.0,	 12,	 0,
-		4.0,	 12,	 -8.0,
-		-4.0,	 12,	 -8.0,
-		-8.0,	 12,	 0,
-		-4.0,	 12,	 8.0,
-		4.0,	 12,	 8.0,
+		8.0,	 12,	 0,			1, 1, 1,
+		4.0,	 12,	 -8.0, 		1, 1, 1,
+		-4.0,	 12,	 -8.0, 		1, 1, 1,
+		-8.0,	 12,	 0,			1, 1, 1,
+		-4.0,	 12,	 8.0, 		1, 1, 1,
+		4.0,	 12,	 8.0, 		1, 1, 1,
 		//18
-		7.7,	 16,	 0,
-		3.85,	 16,	 -7.7,
-		-3.85,	 16,	 -7.7,
-		-7.7,	 16,	 0,
-		-3.85,	 16,	 7.7,
-		3.85,	 16,	 7.7,
+		7.7,	 16,	 0,			1, 0, 0,
+		3.85,	 16,	 -7.7,			1, 0, 0,
+		-3.85,	 16,	 -7.7,			1, 0, 0,
+		-7.7,	 16,	 0,			1, 0, 0,
+		-3.85,	 16,	 7.7,			1, 0, 0,
+		3.85,	 16,	 7.7,			1, 0, 0,
 		//24
-		7.4,	 20,	 0,
-		3.7,	 20,	 -7.4,
-		-3.7,	 20,	 -7.4,
-		-7.4,	 20,	 0,
-		-3.7,	 20,	 7.4,
-		3.7,	 20,	 7.4,
+		7.4,	 20,	 0,			1, 1, 1, 
+		3.7,	 20,	 -7.4,			1, 1, 1, 
+		-3.7,	 20,	 -7.4,			1, 1, 1, 
+		-7.4,	 20,	 0,			1, 1, 1, 
+		-3.7,	 20,	 7.4,			1, 1, 1, 
+		3.7,	 20,	 7.4,			1, 1, 1, 
 		//30
-		7.1,	 24,	 0,
-		3.55,	 24,	 -7.1,
-		-3.55,	 24,	 -7.1,
-		-7.1,	 24,	 0,
-		-3.55,	 24,	 7.1,
-		3.55,	 24,	 7.1,
+		7.1,	 24,	 0,			1, 0, 0,
+		3.55,	 24,	 -7.1,			1, 0, 0,
+		-3.55,	 24,	 -7.1,			1, 0, 0,
+		-7.1,	 24,	 0,			1, 0, 0,
+		-3.55,	 24,	 7.1,			1, 0, 0,
+		3.55,	 24,	 7.1,			1, 0, 0,
 		//36
-		6.8,	 28,	 0,
-		3.4,	 28,	 -6.8,
-		-3.4,	 28,	 -6.8,
-		-6.8,	 28,	 0,
-		-3.4,	 28,	 6.8,
-		3.4,	 28,	 6.8,
+		6.8,	 28,	 0,			1, 1, 1, 
+		3.4,	 28,	 -6.8,			1, 1, 1, 
+		-3.4,	 28,	 -6.8,			1, 1, 1, 
+		-6.8,	 28,	 0,			1, 1, 1, 
+		-3.4,	 28,	 6.8,			1, 1, 1, 
+		3.4,	 28,	 6.8,			1, 1, 1, 
 		//42
-		6.5,	 32,	 0,
-		3.25,	 32,	 -6.5,
-		-3.25,	 32,	 -6.5,
-		-6.5,	 32,	 0,
-		-3.25,	 32,	 6.5,
-		3.25,	 32,	 6.5,
+		6.5,	 32,	 0,			1, 0, 0,
+		3.25,	 32,	 -6.5,			1, 0, 0,
+		-3.25,	 32,	 -6.5,			1, 0, 0,
+		-6.5,	 32,	 0,			1, 0, 0,
+		-3.25,	 32,	 6.5,			1, 0, 0,
+		3.25,	 32,	 6.5,			1, 0, 0,
 		//48
-		6.2,	 36,	 0,
-		3.1,	 36,	 -6.2,
-		-3.1,	 36,	 -6.2,
-		-6.2,	 36,	 0,
-		-3.1,	 36,	 6.2,
-		3.1,	 36,	 6.2,
+		6.2,	 36,	 0,			1, 1, 1,
+		3.1,	 36,	 -6.2,			1, 1, 1,
+		-3.1,	 36,	 -6.2,			1, 1, 1,
+		-6.2,	 36,	 0,			1, 1, 1,
+		-3.1,	 36,	 6.2,			1, 1, 1,
+		3.1,	 36,	 6.2,			1, 1, 1,
 		//54
-		5.9,	 40,	 0,
-		2.95,	 40,	 -5.9,
-		-2.95,	 40,	 -5.9,
-		-5.9,	 40,	 0,
-		-2.95,	 40,	 5.9,
-		2.95,	 40,	 5.9,
+		5.9,	 40,	 0,			1, 0, 0,
+		2.95,	 40,	 -5.9,		1, 0, 0,
+		-2.95,	 40,	 -5.9,		1, 0, 0,
+		-5.9,	 40,	 0,			1, 0, 0,
+		-2.95,	 40,	 5.9,		1, 0, 0,
+		2.95,	 40,	 5.9,		1, 0, 0,
 
 		//66
-		8, 46, 0,
-		4, 46, -8,
-		-4, 46, -8,
-		-8, 46, 0,
-		-4, 46, 8,
-		4, 46, 8,
+		8, 46, 0,		1,1,1,
+		4, 46, -8,		1,1,1,
+		-4, 46, -8,		1,1,1,
+		-8, 46, 0,		1,1,1,
+		-4, 46, 8,		1,1,1,
+		4, 46, 8,		1,1,1,
 
 		//66
-		6, 50, 0,
-		3, 50, -6,
-		-3, 50, -6,
-		-6, 50, 0,
-		-3, 50, 6,
-		3, 50, 6,
+		6, 50, 0,		1,0,0,
+		3, 50, -6,		1,0,0,
+		-3, 50, -6,		1,0,0,
+		-6, 50, 0,		1,0,0,
+		-3, 50, 6,		1,0,0,
+		3, 50, 6,		1,0,0,
 		//72
-		0, 54, 0,
+		0, 54, 0,		1,0,0,
 
 	};
 
@@ -259,8 +259,8 @@ void Lighthouse::InitModel() {
 	Lighthouse::uniProj = glGetUniformLocation(Lighthouse::model.shader.program, "proj");
 	Lighthouse::uniView = glGetUniformLocation(Lighthouse::model.shader.program, "view");
 	Lighthouse::uniModel = glGetUniformLocation(Lighthouse::model.shader.program, "model");
-	//Lighthouse::uniStorm = glGetUniformLocation(Lighthouse::model.shader.program, "storminess");
-	//Lighthouse::uniLightning = glGetUniformLocation(Lighthouse::model.shader.program, "lightningTimer");
+	Lighthouse::uniStorm = glGetUniformLocation(Lighthouse::model.shader.program, "storminess");
+	Lighthouse::uniLightning = glGetUniformLocation(Lighthouse::model.shader.program, "lightningTimer");
 }
 
 void Lighthouse::DestroyModel() {
@@ -268,12 +268,45 @@ void Lighthouse::DestroyModel() {
 }
 
 Lighthouse::Lighthouse() {
-	scale = glm::vec3(0.03, 0.03, 0.03);
-	position = glm::vec3(0, 0, 3);
+	rotation.x = 15;
+	scale = glm::vec3(0.07, 0.07, 0.07);
+	
+	//below waves
+	position = glm::vec3(15, -16, 30);
+
+	//start position
+	//position = glm::vec3(15, -13, 30);
+
+	//storm position
+	//position = glm::vec3(6, -3.7, 10);
+
+	//end position
+	//position = glm::vec3(1.8, -0.4, 2.7);
 }
+
+void Lighthouse::moveTo(glm::vec3 pos, float t) {
+	moveTimer = 0;
+	moveTimerMax = t;
+	prevPos = position;
+	goalPos = pos;
+}
+	
+//position = glm::vec3(10, -8.5, 20);
 
 void Lighthouse::update(float dt) {
 	//rotation.y += 10 * dt;
+
+	if (moveTimer < moveTimerMax) {
+		moveTimer += dt;
+
+		if (moveTimer >= moveTimerMax) {
+			prevPos = goalPos;
+			position = goalPos;
+		}
+		else {
+			position = prevPos + ((goalPos - prevPos) * (moveTimer / moveTimerMax));
+		}
+	}
 
 	//update transform
 	transform = glm::mat4(); //return to identity matrix
@@ -299,8 +332,8 @@ void Lighthouse::draw() {
 	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(transform));
 
 	//special effects
-	//glUniform1f(uniStorm, storminess);
-	//glUniform1f(uniLightning, lightningTimer);
+	glUniform1f(uniStorm, storminess);
+	glUniform1f(uniLightning, lightningTimer);
 
 	drawModel(Lighthouse::model);
 }

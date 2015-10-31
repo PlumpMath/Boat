@@ -155,6 +155,8 @@ float timeBetweenLightning;
 bool doesLightningStrikeOnWaveCollision = false;
 float waveTimer = 0;
 
+int lighthouseMoveCounter = 0;
+
 Boat boat;
 Flag flag;
 Lighthouse lighthouse;
@@ -367,6 +369,16 @@ void dramaUpdate(float dt) {
 		startBigWave();
 	}
 	
+	//lighthouse events
+	if (totalTime > 2 && lighthouseMoveCounter < 1) {
+		lighthouse.moveTo(glm::vec3(6, -3.7, 10), startOfStormTime - 2);
+		lighthouseMoveCounter++;
+	}
+	else if (totalTime > (endOfStormTime + 30 + 3) && lighthouseMoveCounter < 2) {
+		//lighthouse.moveTo(glm::vec3(1.8, -0.4, 2.7), 15);
+		lighthouse.moveTo(glm::vec3(2, -0.4, 2.7), 15);
+		lighthouseMoveCounter++;
+	}
 	
 
 	//storminess
@@ -591,6 +603,7 @@ void OnKeyDown(SDL_KeyboardEvent* key) {
 	else {
 		hasGameStarted = true;
 		boat.startEntranceAnimation();
+		lighthouse.moveTo(glm::vec3(15, -13, 30), 2);
 	}
 	/*
 	if (keyname == "Space") {

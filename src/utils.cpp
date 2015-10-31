@@ -31,6 +31,10 @@ SDL_GLContext start_gl(SDL_Window* window) {
 	//enable depth testing
 	glEnable(GL_DEPTH_TEST);
 
+	//enable alpha
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable( GL_BLEND );
+
 	return context;
 }
 

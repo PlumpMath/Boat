@@ -1,8 +1,8 @@
 #version 150
 
-flat in vec3 vertColor;
+flat in vec4 vertColor;
 out vec4 outColor;
 
 void main() {
-   outColor = vec4(vertColor, 1);
+   outColor = vertColor;
 }

@@ -14,7 +14,7 @@ Camera::Camera() {
 	);	
 
 	//set up field of view / projection matrix
-	proj = glm::perspective(glm::radians(90.0f), 800.0f / 600.0f, 1.0f, 10.0f);
+	proj = glm::perspective(glm::radians(90.0f), 800.0f / 600.0f, 1.0f, 40.0f);
 }
 
 glm::mat4 Camera::ProjViewMatrix() {
