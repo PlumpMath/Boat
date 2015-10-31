@@ -19,12 +19,15 @@
 #include <string>
 using std::string;
 #include <stdlib.h> 
+#include <math.h> 
+#define PI 3.14159265
 
 //my stuff
 #include "utils.h"
 #include "globals.h"
 #include "Camera.h"
 #include "Boat.h"
+#include "Flag.h"
 
 
 /*
@@ -36,14 +39,32 @@ TO DO:
 	- wake
 - lighthouse model
 - SFX + soundtrack
-- underwater quad
 - jumping fish?
+
+!!! keep an eye on the wave clean up code... it might cause bugs
+//^^^ this seems to be working ok
 
 - ideas from meetup
 - - warning of wave direction *
 - - sailors that fall overboard
 - - the boat gets waterlogged the more it gets hit
 - - warning before final wave *
+
+
+big to dos:
+- flag
+- lighthouse
+
+medium to dos:
+- rain
+- boat smoke
+
+small to dos:
+- jumping fish
+
+later:
+- sfx
+- soundtrack
 */
 
 glApp app;
@@ -141,6 +162,7 @@ bool doesLightningStrikeOnWaveCollision = false;
 float waveTimer = 0;
 
 Boat boat;
+Flag flag;
 
 glm::vec3 randomWaveStartingPosition(float waveHeight) {
 	float rad = glm::radians( (rand() % 360) * 1.0f );
@@ -192,8 +214,12 @@ void startNewWave(DifficultyLevel difficulty) {
 	float speed = difficulty.minSpeed + (r2 * (difficulty.maxSpeed - difficulty.minSpeed));
 
 	wavePos = randomWaveStartingPosition(height);
-	waveSpeed = waveToBoatVec3(wavePos, boat) * speed;
+	glm::vec3 toBoat = waveToBoatVec3(wavePos, boat);
+	waveSpeed = toBoat * speed;
 	wavePos.y = height;
+
+	std::cout << toBoat.z << std::endl;
+	flag.setRotYGoal( atan2(-toBoat.z, -toBoat.x) * (180 / PI) );
 
 	didWaveHitPlayer = false;
 }
@@ -297,8 +323,11 @@ void ready() {
 
 	Boat::InitModel();
 
+	Flag::InitModel();
+
 	//random wave
 	startNewWave(curDifficulty);
+	flag.setRotYGoal(0);
 }
 
 void dramaUpdate(float dt) {
@@ -422,7 +451,7 @@ void waveUpdate(float dt) {
 
 		if (betweenWavesTimer > curDifficulty.timeBetweenWaves) {
 			//std::cout << "wave timer is done!" << std::endl;
-			startNewWave(curDifficulty);
+			if (curDifficulty.minSize > 0 ) startNewWave(curDifficulty); //more hacks for calm period
 			betweenWaves = false;
 		}
 	}
@@ -519,7 +548,9 @@ void update(float dt) {
 	
 	waveUpdate(dt);
 	boat.update(dt);
-	
+	flag.update(dt, boat.flagAnchorPoint(), boat.rotation);	
+
+	flag.draw();
 	boat.draw();
 	drawOcean();
 
@@ -528,6 +559,8 @@ void update(float dt) {
 
 void on_quit() {
 	Boat::DestroyModel();
+	Flag::DestroyModel();
+	//destroy the ocean model???
 }
 
 void OnKeyDown(SDL_KeyboardEvent* key) {
@@ -542,6 +575,10 @@ void OnKeyDown(SDL_KeyboardEvent* key) {
 			lightningTimer = 0;
 		}
 		*/
+
+		if (keyname == "Space") {
+			flag.setRotYGoal( (rand() % 360) * 1.0f );
+		}
 	}
 	else {
 		hasGameStarted = true;
@@ -599,11 +636,10 @@ void loop() {
 			}
 		}
 
-		// Clear the screen
+		// Clear the screen (move this into update?)
 		glm::vec3 skyColor = glm::vec3(0.3, 0.7, 1.0);
 		glm::vec3 stormColor = glm::vec3(0.1, 0.15, 0.25);
 		glm::vec3 curColor = skyColor + (storminess * (stormColor - skyColor));
-
 		if (lightningTimer < 0.3) {
 			curColor = glm::vec3(1,1,1);	
 		}
@@ -621,9 +657,6 @@ void loop() {
 				curColor = lightningColor;
 			}
 		}
-
-        //glClearColor(0.3f, 0.7f, 1.0f, 1.0f); //light blue
-        //glClearColor(0.1, 0.15, 0.25, 1); //dark blue grey
         glClearColor(curColor.x, curColor.y, curColor.z, 1);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //depth buffer needs to be cleared for depth testing

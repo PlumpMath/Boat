@@ -20,6 +20,7 @@ class Boat {
 		bool testWaveCollision(glm::vec3 wavePos);
 		void startEntranceAnimation();
 		void testBigWaveCollision(glm::vec3 wavePos);
+		glm::vec3 flagAnchorPoint();
 		
 		glm::vec3 position;
 		glm::vec3 rotation;

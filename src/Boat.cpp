@@ -268,6 +268,13 @@ Boat::Boat() {
 	//transform = glm::translate(transform, glm::vec3(0, 1, 0));
 }
 
+glm::vec3 Boat::flagAnchorPoint() {
+	glm::vec4 anchorInLocalSpace = glm::vec4(0, 8.5, 5, 0);
+	glm::vec4 anchorInWorldSpace = transform * anchorInLocalSpace;
+	anchorInWorldSpace += glm::vec4(position.x * scale.x, position.y * scale.y, position.z * scale.z, 0);
+	return glm::vec3(anchorInWorldSpace.x, anchorInWorldSpace.y, anchorInWorldSpace.z);
+}
+
 void Boat::update(float dt) {
 	totalTime += dt;
 
@@ -433,6 +440,8 @@ void Boat::update(float dt) {
 	if (isStunned) {
 		stunSpin(dt);
 	}
+
+	//std::cout << position.x << std::endl;
 }
 	
 
