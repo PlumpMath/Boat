@@ -147,6 +147,7 @@ DifficultyLevel curDifficulty = dramaticArc[dramaIndex].difficulty;
 bool betweenWaves = false;
 float betweenWavesTimer = 0;
 float totalTime = 0;
+float totalPlayTime = 0;
 
 float storminess = 0;
 float lightningTimer = 8; //time since last lightning strike
@@ -330,6 +331,7 @@ void ready() {
 
 void dramaUpdate(float dt) {
 	dramaTimer += dt;
+	totalPlayTime += dt;
 	//std::cout << dramaTimer << std::endl;
 
 	float startOfStormTime = (dramaticArc[0].time + dramaticArc[1].time + dramaticArc[2].time);
@@ -359,40 +361,40 @@ void dramaUpdate(float dt) {
 	}
 
 	//send the flag flying away
-	if (totalTime > (endOfStormTime - 10) && flag.isAttachedToBoat) {
+	if (totalPlayTime > (endOfStormTime - 10) && flag.isAttachedToBoat) {
 		flag.setRotYGoal( 270 );
 		flag.isAttachedToBoat = false;
 	}
 
-	if (!isTheBigOne && totalTime > (endOfStormTime - 5)) {
+	if (!isTheBigOne && totalPlayTime > (endOfStormTime - 5)) {
 		//std::cout << "HERE IT COMES " << std::endl;
 		startBigWave();
 	}
 	
 	//lighthouse events
-	if (totalTime > 2 && lighthouseMoveCounter < 1) {
+	if (totalPlayTime > 2 && lighthouseMoveCounter < 1) {
 		lighthouse.moveTo(glm::vec3(6, -3.7, 10), startOfStormTime - 2);
 		lighthouseMoveCounter++;
 	}
-	else if (totalTime > (endOfStormTime + 30 + 3) && lighthouseMoveCounter < 2) {
+	else if (totalPlayTime > (endOfStormTime + 30 + 3) && lighthouseMoveCounter < 2) {
 		//lighthouse.moveTo(glm::vec3(1.8, -0.4, 2.7), 15);
-		lighthouse.moveTo(glm::vec3(2, -0.4, 2.7), 15);
+		lighthouse.moveTo(glm::vec3(2, -0.4, 2), 30);
 		lighthouseMoveCounter++;
 	}
 	
 
 	//storminess
-	if (totalTime < startOfStormTime - 5) {
+	if (totalPlayTime < startOfStormTime - 5) {
 		storminess = 0;
 	}
-	else if (totalTime < startOfStormTime) {
-		storminess = (totalTime - (startOfStormTime - 5)) / 5;
+	else if (totalPlayTime < startOfStormTime) {
+		storminess = (totalPlayTime - (startOfStormTime - 5)) / 5;
 	}
-	else if (totalTime < (endOfStormTime + 15)) {
+	else if (totalPlayTime < (endOfStormTime + 15)) {
 		storminess = 1;
 	}
-	else if (totalTime < endOfStormTime + 20) {
-		storminess = (5 - (totalTime - (endOfStormTime + 15))) / 5;
+	else if (totalPlayTime < endOfStormTime + 20) {
+		storminess = (5 - (totalPlayTime - (endOfStormTime + 15))) / 5;
 	}
 	else {
 		storminess = 0;
@@ -401,52 +403,40 @@ void dramaUpdate(float dt) {
 
 	//lightning
 	lightningTimer += dt;
-	//if (totalTime > (startOfStormTime - 2.51) && totalTime < startOfStormTime) { //start of storm
-	if (totalTime > startOfStormTime && totalTime < (startOfStormTime + 1)) {
+	//if (totalPlayTime > (startOfStormTime - 2.51) && totalPlayTime < startOfStormTime) { //start of storm
+	if (totalPlayTime > startOfStormTime && totalPlayTime < (startOfStormTime + 1)) {
 		if (lightningStrikeCounter < 1) {
 			lightningTimer = 0;
 			lightningStrikeCounter++;
 		}
 	}
-	else if (totalTime > hardModeTime && totalTime < (hardModeTime + 5)) { //start of second wave
+	else if (totalPlayTime > hardModeTime && totalPlayTime < (hardModeTime + 5)) { //start of second wave
 		if (lightningStrikeCounter < 2) {
 			lightningTimer = 0;
 			lightningStrikeCounter++;
 		}
 	}
-	//else if (totalTime > impossibleModeTime && totalTime < (impossibleModeTime + 5)) { //start of third wave
-	else if (totalTime > (impossibleModeTime - 1) && totalTime < impossibleModeTime) { //start of third wave
+	//else if (totalPlayTime > impossibleModeTime && totalPlayTime < (impossibleModeTime + 5)) { //start of third wave
+	else if (totalPlayTime > (impossibleModeTime - 1) && totalPlayTime < impossibleModeTime) { //start of third wave
 		if (lightningStrikeCounter < 3) {
 			lightningTimer = 0;
 			lightningStrikeCounter++;
 			//timeBetweenLightning = (2 + (rand() % 5)) * 1.0f;
 		}
 	}
-	else if (totalTime > impossibleModeTime && totalTime < (fakeCalmTime - 5)) { //third wave
+	else if (totalPlayTime > impossibleModeTime && totalPlayTime < (fakeCalmTime - 5)) { //third wave
 		doesLightningStrikeOnWaveCollision = true;
 		lightningTimer += dt; //double the speed of lightning in this period
-
-		/*
-		timeBetweenLightning -= dt;
-
-		if (timeBetweenLightning <= 0) {
-			lightningTimer = 0;
-			timeBetweenLightning = (3 + (rand() % 4)) * 1.0f;
-			//NOTE: this works ok. other possible ideas: 
-			//lightning every time the boat gets hit, 
-			//lightning every time a wave starts
-		}
-		*/
 	}
-	else if (totalTime > fakeCalmTime && totalTime < (fakeCalmTime + 5)) { //end of third wave
+	else if (totalPlayTime > fakeCalmTime && totalPlayTime < (fakeCalmTime + 5)) { //end of third wave
 		doesLightningStrikeOnWaveCollision = false;
 		if (lightningStrikeCounter < 4) {
 			lightningTimer = 0;
 			lightningStrikeCounter++;
 		}
 	}
-	//else if (totalTime > (endOfStormTime + 20 - 2.51) && totalTime < (endOfStormTime + 25)) { //end of storm
-	else if (totalTime > (endOfStormTime + 20 - 5) && totalTime < (endOfStormTime + 25)) { //end of storm
+	//else if (totalPlayTime > (endOfStormTime + 20 - 2.51) && totalPlayTime < (endOfStormTime + 25)) { //end of storm
+	else if (totalPlayTime > (endOfStormTime + 20 - 5) && totalPlayTime < (endOfStormTime + 25)) { //end of storm
 		if (lightningStrikeCounter < 5) {
 			lightningTimer = 0;
 			lightningStrikeCounter++;
@@ -601,9 +591,12 @@ void OnKeyDown(SDL_KeyboardEvent* key) {
 		*/
 	}
 	else {
+
+		std::cout << "test" <<std::endl;
+
 		hasGameStarted = true;
 		boat.startEntranceAnimation();
-		lighthouse.moveTo(glm::vec3(15, -13, 30), 2);
+		lighthouse.moveTo(glm::vec3(15, -13.5, 30), 2);
 	}
 	/*
 	if (keyname == "Space") {

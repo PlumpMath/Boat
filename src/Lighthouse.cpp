@@ -269,10 +269,11 @@ void Lighthouse::DestroyModel() {
 
 Lighthouse::Lighthouse() {
 	rotation.x = 15;
+	rotation.y = 13;
 	scale = glm::vec3(0.07, 0.07, 0.07);
 	
 	//below waves
-	position = glm::vec3(15, -16, 30);
+	position = glm::vec3(15, -18, 30);
 
 	//start position
 	//position = glm::vec3(15, -13, 30);
@@ -281,10 +282,12 @@ Lighthouse::Lighthouse() {
 	//position = glm::vec3(6, -3.7, 10);
 
 	//end position
-	//position = glm::vec3(1.8, -0.4, 2.7);
+	//position = glm::vec3(2, -0.4, 2);
 }
 
 void Lighthouse::moveTo(glm::vec3 pos, float t) {
+	std::cout << "test2" << std::endl;
+
 	moveTimer = 0;
 	moveTimerMax = t;
 	prevPos = position;
