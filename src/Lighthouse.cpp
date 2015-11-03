@@ -12,7 +12,6 @@ GLint Lighthouse::uniLightning;
 void Lighthouse::InitModel() {
 	GLfloat vertices[] = {
 		//x, y, z,	r, g, b,
-
 		//0
 		10, 0, 0,		1, 1, 1,
 		5, 0, -10,		1, 1, 1,
@@ -102,7 +101,6 @@ void Lighthouse::InitModel() {
 		3, 50, 6,		1,0,0,
 		//72
 		0, 54, 0,		1,0,0,
-
 	};
 
 	GLuint elements[] = {
@@ -261,6 +259,8 @@ void Lighthouse::InitModel() {
 	Lighthouse::uniModel = glGetUniformLocation(Lighthouse::model.shader.program, "model");
 	Lighthouse::uniStorm = glGetUniformLocation(Lighthouse::model.shader.program, "storminess");
 	Lighthouse::uniLightning = glGetUniformLocation(Lighthouse::model.shader.program, "lightningTimer");
+
+
 }
 
 void Lighthouse::DestroyModel() {
@@ -299,6 +299,11 @@ void Lighthouse::moveTo(glm::vec3 pos, float t) {
 void Lighthouse::update(float dt) {
 	//rotation.y += 10 * dt;
 
+	//glm::vec4 beamPosLocal = (transform * glm::vec4(position, 0)) + glm::vec4(0, 2, 0, 0);
+	//beam.position = glm::vec3(beamPosLocal.x, beamPosLocal.y, beamPosLocal.z);
+	//if (storminess >= 1) 
+	beam.update(dt);
+
 	if (moveTimer < moveTimerMax) {
 		moveTimer += dt;
 
@@ -324,6 +329,8 @@ void Lighthouse::update(float dt) {
 }
 
 void Lighthouse::draw() {
+	
+
 	glBindVertexArray(Lighthouse::model.vao);
 	glUseProgram(Lighthouse::model.shader.program);
 
@@ -339,4 +346,7 @@ void Lighthouse::draw() {
 	glUniform1f(uniLightning, lightningTimer);
 
 	drawModel(Lighthouse::model);
+
+	if (storminess >= 1) beam.draw();
+	//beam.draw();
 }

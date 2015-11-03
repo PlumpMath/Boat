@@ -29,6 +29,7 @@ using std::string;
 #include "Boat.h"
 #include "Flag.h"
 #include "lighthouse.h"
+#include "Lightbeam.h"
 
 
 /*
@@ -38,7 +39,6 @@ TO DO:
 - boat polish
 	- smoke
 	- wake
-- lighthouse model
 - SFX + soundtrack
 - jumping fish?
 
@@ -59,6 +59,22 @@ small to dos:
 later:
 - sfx
 - soundtrack
+
+new list:
+- smooth lighthouse transition to storm
+- lighthouse light
+- rain
+- sailors
+- boat smoke
+- package shaders with .app
+- sound
+- cross platform distribution
+- credits & title
+
+for next gl project:
+- make uniforms more easy / automatic
+- build a "game object base clas"
+- build a "3D model base class"
 */
 
 glApp app;
@@ -324,6 +340,8 @@ void ready() {
 
 	Lighthouse::InitModel();
 
+	Lightbeam::InitModel();
+
 	//random wave
 	startNewWave(curDifficulty);
 	flag.setRotYGoal(0);
@@ -542,6 +560,8 @@ void update(float dt) {
 
 	totalTime += dt;
 
+	//rotateCameraForTesting(dt);
+
 	//make the camera bob
 	glm::mat4 tmpView = camera.view;
 	camera.view = glm::translate(camera.view, glm::vec3(0, 0.1 + (sin(totalTime) * 0.1), 0));
@@ -553,12 +573,13 @@ void update(float dt) {
 	waveUpdate(dt);
 	boat.update(dt);
 	flag.update(dt, boat.flagAnchorPoint(), boat.rotation);	
-	lighthouse.update(dt);
-
-	lighthouse.draw();
+	
 	flag.draw();
 	boat.draw();
 	drawOcean();
+
+	lighthouse.update(dt);
+	lighthouse.draw();
 
 	camera.view = tmpView; //hack to keep base camera view stored
 }
@@ -567,6 +588,7 @@ void on_quit() {
 	Boat::DestroyModel();
 	Flag::DestroyModel();
 	Lighthouse::DestroyModel();
+	Lightbeam::DestroyModel();
 	//destroy the ocean model???
 }
 

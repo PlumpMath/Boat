@@ -19,8 +19,10 @@ void main() {
 	vec3 mNorm = normalize( vec3(model * vec4(normal, 0)) );
 	float diffuse = max(dot(mNorm, lightV), 0.6);
 
-	float a = 1;
-	if (storminess >= 1) a = 0;
+	//float a = 1;
+	//if (storminess >= 1) a = 0;
+
+	float a = 1 - (storminess * 0.95);
 
 	if (lightningTimer < 0.3) {
 		vertColor = vec4(1,1,1,1);
