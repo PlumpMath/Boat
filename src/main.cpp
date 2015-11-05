@@ -25,11 +25,14 @@ using std::string;
 //my stuff
 #include "utils.h"
 #include "globals.h"
+
 #include "Camera.h"
 #include "Boat.h"
 #include "Flag.h"
 #include "lighthouse.h"
 #include "Lightbeam.h"
+#include "ParticleSystem.h"
+#include "RainParticles.h"
 
 
 /*
@@ -61,8 +64,6 @@ later:
 - soundtrack
 
 new list:
-- smooth lighthouse transition to storm
-- lighthouse light
 - rain
 - sailors
 - boat smoke
@@ -177,6 +178,8 @@ int lighthouseMoveCounter = 0;
 Boat boat;
 Flag flag;
 Lighthouse lighthouse;
+
+RainParticles rain;
 
 glm::vec3 randomWaveStartingPosition(float waveHeight) {
 	float rad = glm::radians( (rand() % 360) * 1.0f );
@@ -341,6 +344,9 @@ void ready() {
 	Lighthouse::InitModel();
 
 	Lightbeam::InitModel();
+
+	//debug
+	rain.init();
 
 	//random wave
 	startNewWave(curDifficulty);
@@ -581,6 +587,9 @@ void update(float dt) {
 	lighthouse.update(dt);
 	lighthouse.draw();
 
+	rain.update(dt);
+	rain.draw();
+
 	camera.view = tmpView; //hack to keep base camera view stored
 }
 
@@ -589,6 +598,7 @@ void on_quit() {
 	Flag::DestroyModel();
 	Lighthouse::DestroyModel();
 	Lightbeam::DestroyModel();
+	rain.cleanup();
 	//destroy the ocean model???
 }
 
