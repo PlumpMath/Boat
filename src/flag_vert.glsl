@@ -12,8 +12,8 @@ uniform float lightningTimer;
 out vec3 vertColor;
 
 void main() {
-	vec3 baseColor = vec3(0.8, 0.6, 0);
-	vec3 stormColor = vec3(0.6, 0.4, 0.2);
+	vec3 baseColor = vec3(0.8, 0.4, 0);
+	vec3 stormColor = vec3(0.6, 0.3, 0.2);
 	vec3 lightningColor = vec3(0, 0, 0);
 	
 	vertColor = baseColor + ((stormColor - baseColor) * storminess);
@@ -36,7 +36,7 @@ void main() {
 	}
 
 	if (position.z < 0) {
-		gl_Position = proj * view * model * vec4(sin((waveOffset * 8 * (1 + storminess)) + position.z), position.y, position.z, 1.0);	
+		gl_Position = proj * view * model * vec4(sin((waveOffset * 8 * (1 + storminess)) + position.z) / 3, position.y, position.z, 1.0);	
 	}
 	else {
 		gl_Position = proj * view * model * vec4(position, 1.0);	

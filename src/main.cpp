@@ -33,49 +33,25 @@ using std::string;
 #include "Lightbeam.h"
 #include "ParticleSystem.h"
 #include "RainParticles.h"
+#include "SmokeParticles.h"
 
 
 /*
-TO DO:
-- storm effects
-	- rain
-- boat polish
-	- smoke
-	- wake
-- SFX + soundtrack
-- jumping fish?
-
-- ideas from meetup
-- - sailors that fall overboard
-- - the boat gets waterlogged the more it gets hit
-
-big to dos:
-- lighthouse
-
-medium to dos:
-- rain
-- boat smoke
-
-small to dos:
-- jumping fish
-
-later:
-- sfx
-- soundtrack
-
-new list:
-- rain
+TODO:
+- boat squeeze in and out w/ smoke
 - sailors
-- boat smoke
 - package shaders with .app
 - sound
 - cross platform distribution
 - credits & title
+- make flag hit into camera on its way out
+- jumping fish
 
 for next gl project:
 - make uniforms more easy / automatic
 - build a "game object base clas"
 - build a "3D model base class"
+- expand on particle system class
 */
 
 glApp app;
@@ -180,6 +156,7 @@ Flag flag;
 Lighthouse lighthouse;
 
 RainParticles rain;
+SmokeParticles smoke;
 
 glm::vec3 randomWaveStartingPosition(float waveHeight) {
 	float rad = glm::radians( (rand() % 360) * 1.0f );
@@ -236,6 +213,7 @@ void startNewWave(DifficultyLevel difficulty) {
 	wavePos.y = height;
 
 	flag.setRotYGoal( (atan2(toBoat.x, toBoat.z) * (180 / PI)) + 180 );
+	//rain.gust(toBoat);
 
 	didWaveHitPlayer = false;
 }
@@ -345,8 +323,8 @@ void ready() {
 
 	Lightbeam::InitModel();
 
-	//debug
 	rain.init();
+	smoke.init();
 
 	//random wave
 	startNewWave(curDifficulty);
@@ -405,7 +383,6 @@ void dramaUpdate(float dt) {
 		lighthouse.moveTo(glm::vec3(2, -0.4, 2), 30);
 		lighthouseMoveCounter++;
 	}
-	
 
 	//storminess
 	if (totalPlayTime < startOfStormTime - 5) {
@@ -565,6 +542,7 @@ void rotateCameraForTesting(float dt) {
 void update(float dt) {
 
 	totalTime += dt;
+	//lightningTimer += dt; //debug only
 
 	//rotateCameraForTesting(dt);
 
@@ -590,6 +568,10 @@ void update(float dt) {
 	rain.update(dt);
 	rain.draw();
 
+	smoke.position = boat.smokeAnchorPoint();
+	smoke.update(dt);
+	smoke.draw();
+
 	camera.view = tmpView; //hack to keep base camera view stored
 }
 
@@ -606,21 +588,14 @@ void OnKeyDown(SDL_KeyboardEvent* key) {
 	string keyname = SDL_GetKeyName( key->keysym.sym );
 	//std::cout << "down " << keyname << std::endl;
 
+	/*
+	if (keyname == "Space") {
+		lightningTimer = 0;
+	}
+	*/
+
 	if (hasGameStarted) {
 		boat.onkeydown(keyname);
-
-		/*
-		if (keyname == "Space") {
-			lightningTimer = 0;
-		}
-		*/
-
-		/*
-		if (keyname == "Space") {
-			flag.setRotYGoal( 270 );
-			flag.isAttachedToBoat = false;
-		}
-		*/
 	}
 	else {
 
@@ -630,6 +605,7 @@ void OnKeyDown(SDL_KeyboardEvent* key) {
 		boat.startEntranceAnimation();
 		lighthouse.moveTo(glm::vec3(15, -13.5, 30), 2);
 	}
+
 	/*
 	if (keyname == "Space") {
 		wavePos = randomWaveStartingPosition(1);

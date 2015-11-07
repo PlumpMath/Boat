@@ -29,7 +29,7 @@ class ParticleSystem {
 
 		glm::vec3 position;
 
-		vector<Particle> particles;
+		vector<Particle*> particles;
 
 		float lifetimeMax;
 
@@ -37,6 +37,7 @@ class ParticleSystem {
 		float maxTimeBetweenBursts;
 		int particleBurstCount;
 
-		virtual Particle generateParticle();
-		void updateParticle(Particle* p, float dt);
+		virtual Particle* generateParticle(int i); //index so you know which order particles are made in
+		virtual void updateParticle(Particle* p, float dt);
+		virtual void drawParticle(Particle* p);
 };

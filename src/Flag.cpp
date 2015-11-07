@@ -33,30 +33,40 @@ void Flag::InitModel() {
 		0, -2.8, -3, 
 		0, -2.4, -4, 
 		0, -2, -5, 
-		0, -1.6, -6, 
+		0, -1.6, -6,
 		0, -1.2, -7, 
 		0, -0.8, -8, 
 		0, -0.4, -9, 
 	};
 
 	GLuint elements[] = {
+		
 		0, 1, 11,
+
 		1, 11, 12,
 		1, 2, 12,
+
 		2, 12, 13,
 		2, 3, 13,
+
 		3, 13, 14,
 		3, 4, 14,
+
 		4, 14, 15,
 		4, 5, 15,
+
 		5, 15, 16,
 		5, 6, 16,
+
 		6, 16, 17,
 		6, 7, 17,
+	
 		7, 17, 18,
 		7, 8, 18,
+		
 		8, 18, 19,
 		8, 9, 19,
+		
 		9, 19, 20,
 		9, 10, 20,
 	};
@@ -66,8 +76,7 @@ void Flag::InitModel() {
 		vertices, sizeof(vertices),
 		elements, sizeof(elements),
 		{
-			{"position", 3},
-			{"color", 3},
+			{"position", 3}
 		}
 	);
 
@@ -90,7 +99,7 @@ void Flag::DestroyModel() {
 Flag::Flag() {
 	std::cout << "init flag!!!" << std::endl;
 
-	scale = glm::vec3(0.02, 0.01, 0.01);
+	scale = glm::vec3(0.02 * 1.5, 0.01 * 1.5, 0.01 * 1.5);
 }
 
 void Flag::update(float dt, glm::vec3 anchorPos, glm::vec3 anchorRot) {
@@ -136,7 +145,6 @@ void Flag::update(float dt, glm::vec3 anchorPos, glm::vec3 anchorRot) {
 
 	//update transform
 	transform = glm::mat4(); //return to identity matrix
-
 	
 	transform = glm::translate(transform, position); //position
 
@@ -146,6 +154,8 @@ void Flag::update(float dt, glm::vec3 anchorPos, glm::vec3 anchorRot) {
 	transform = glm::rotate(transform, glm::radians(rotation.z), glm::vec3(0,0,1));
 
 	transform = glm::scale( transform, glm::vec3( scale.x, scale.y, scale.z * ( 1 + ((stiffnessTimer / 2)*2) ) )); //scale
+
+	
 
 }
 

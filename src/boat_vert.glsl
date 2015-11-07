@@ -17,8 +17,8 @@ flat out vec3 triColor;
 void main() {
 
 	//storminess = 1;
-	float s1 = 1 - (0.8 * storminess);
-	float s2 = 1 - (0.4 * storminess);
+	float s1 = 1 - (0.7 * storminess);
+	float s2 = 1 - (0.5 * storminess);
 	float s3 = 1 + (1 * storminess);
 
 	//bouncy wave effect

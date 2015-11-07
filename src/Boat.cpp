@@ -258,7 +258,9 @@ void Boat::DestroyModel() {
 Boat::Boat() {
 	//transform = glm::scale(transform, glm::vec3(0.08, 0.08, 0.08));
 	//scale = glm::vec3(0.08, 0.08, 0.08); 
-	scale = glm::vec3(0.06, 0.06, 0.06);
+	//scale = glm::vec3(0.06, 0.06, 0.06);
+	scale = glm::vec3(0.07, 0.05, 0.07);
+	scale = glm::vec3(0.05, 0.07, 0.05);
 	scaleNormFactor = (0.08 / scale.x); //dumb hack 'cause I made everything work w/ size 0.08
 	speed = 12 * scaleNormFactor;
 
@@ -270,6 +272,14 @@ Boat::Boat() {
 
 glm::vec3 Boat::flagAnchorPoint() {
 	glm::vec4 anchorInLocalSpace = glm::vec4(0, 8.5, 5, 0);
+	glm::vec4 anchorInWorldSpace = transform * anchorInLocalSpace;
+	anchorInWorldSpace += glm::vec4(position.x * scale.x, position.y * scale.y, position.z * scale.z, 0);
+	return glm::vec3(anchorInWorldSpace.x, anchorInWorldSpace.y, anchorInWorldSpace.z);
+}
+
+
+glm::vec3 Boat::smokeAnchorPoint() {
+	glm::vec4 anchorInLocalSpace = glm::vec4(0, 10, -3, 0);
 	glm::vec4 anchorInWorldSpace = transform * anchorInLocalSpace;
 	anchorInWorldSpace += glm::vec4(position.x * scale.x, position.y * scale.y, position.z * scale.z, 0);
 	return glm::vec3(anchorInWorldSpace.x, anchorInWorldSpace.y, anchorInWorldSpace.z);

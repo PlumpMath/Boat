@@ -8,10 +8,21 @@ class RainParticles: public ParticleSystem {
 
 	public:
 		RainParticles();
+		void update(float dt);
+		void draw();
 		void init();
 
 	protected:
-		Particle generateParticle();
-		//void updateParticle(Particle p, float dt);
-	
+		GLint uniLightning;
+
+		float xRange;
+		float zRange;
+
+		glm::vec3 windDirection;
+
+		float minSpeed = 8;
+		float maxSpeed = 12;
+
+		Particle* generateParticle(int i);
+
 };

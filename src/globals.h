@@ -5,3 +5,5 @@
 extern Camera camera;
 extern float storminess;
 extern float lightningTimer;
+extern float totalTime;
+extern float totalPlayTime;
