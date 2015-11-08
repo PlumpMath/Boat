@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <algorithm> 
+#include <math.h>
 
 //init static variables (for reasons I still don't fully understand)
 glModelData Boat::model;
@@ -256,11 +257,10 @@ void Boat::DestroyModel() {
 
 //methods
 Boat::Boat() {
-	//transform = glm::scale(transform, glm::vec3(0.08, 0.08, 0.08));
-	//scale = glm::vec3(0.08, 0.08, 0.08); 
-	//scale = glm::vec3(0.06, 0.06, 0.06);
-	scale = glm::vec3(0.07, 0.05, 0.07);
-	scale = glm::vec3(0.05, 0.07, 0.05);
+	scale = glm::vec3(0.06, 0.06, 0.06); //base scale
+	//scale = glm::vec3(0.07, 0.05, 0.07); //squish
+	//scale = glm::vec3(0.05, 0.07, 0.05); //stretch
+	
 	scaleNormFactor = (0.08 / scale.x); //dumb hack 'cause I made everything work w/ size 0.08
 	speed = 12 * scaleNormFactor;
 
@@ -437,11 +437,28 @@ void Boat::update(float dt) {
 		
 	}
 
+	//squash and stretch animation
+	float squashTotalTime = 1.0f;
+	float squashStretchAnimTime = fmod(totalTime + 0.1f, squashTotalTime);
+	glm::vec3 squash = glm::vec3(1.1, 0.9, 1); //squash
+	glm::vec3 stretch = glm::vec3(0.9, 1.1, 1); //stretch
+	glm::vec3 squashEffect;
+	if (squashStretchAnimTime <= (squashTotalTime * 0.7f)) {
+		squashEffect = stretch + ((squashStretchAnimTime / (squashTotalTime * 0.7f)) * (squash - stretch));
+	}
+	else {
+		squashEffect = squash + (((squashStretchAnimTime - (squashTotalTime * 0.7f)) / (squashTotalTime * 0.3f)) * (stretch - squash));
+	}
+
 	//update transform
 	transform = glm::mat4(); //return to identity matrix
 
 	transform = glm::scale(transform, scale); //scale
 	transform = glm::translate(transform, position); //position
+
+	//squash/stretch scaling
+	transform = glm::scale(transform, squashEffect);
+
 	//rotation
 	transform = glm::rotate(transform, glm::radians(rotation.x), glm::vec3(1,0,0));
 	transform = glm::rotate(transform, glm::radians(rotation.y), glm::vec3(0,1,0));

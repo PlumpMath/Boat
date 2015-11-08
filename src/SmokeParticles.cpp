@@ -35,8 +35,8 @@ void SmokeParticles::init() {
 }
 
 SmokeParticles::SmokeParticles() {
-	lifetimeMax = 1;
-	maxTimeBetweenBursts = 0.5;
+	lifetimeMax = 3;
+	maxTimeBetweenBursts = 1;
 	particleBurstCount = 100;
 }
 
@@ -56,14 +56,14 @@ Particle* SmokeParticles::generateParticle(int i) {
 	else {
 		rad = glm::radians( 90 + ((i * 0.5f) / (particleBurstCount * 0.5f)) * -180.0f );
 	}
-	float size = 0.001 + (0.015 * ((rand() % 100) / 100.0f));
+	float size = 0.005 + (0.03 * ((rand() % 100) / 100.0f));
 	float rotSpeed = -100 + ((rand() % 200) * 1.0f);
 
 	SmokeParticle* s = new SmokeParticle();
 	s->position = glm::vec3(position.x,position.y,position.z);
 	s->scale = glm::vec3(size, size, size);
 	s->rotation = glm::vec3(0,0,0);
-	s->velocity = glm::vec3(cos(rad) * 0.075, 0.3, sin(rad) * 0.075);
+	s->velocity = glm::vec3(cos(rad) * 0.05, 0.3, sin(rad) * 0.05);
 	s->lifetime = 0;
 	s->rotationSpeed = rotSpeed;
 
