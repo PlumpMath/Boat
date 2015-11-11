@@ -34,11 +34,11 @@ using std::string;
 #include "ParticleSystem.h"
 #include "RainParticles.h"
 #include "SmokeParticles.h"
+#include "Sailor.h"
 
 
 /*
 TODO:
-- boat squeeze in and out w/ smoke
 - sailors
 - package shaders with .app
 - sound
@@ -157,6 +157,9 @@ Lighthouse lighthouse;
 
 RainParticles rain;
 SmokeParticles smoke;
+
+const int testSailorNum = 50;
+Sailor testSailors[testSailorNum];
 
 glm::vec3 randomWaveStartingPosition(float waveHeight) {
 	float rad = glm::radians( (rand() % 360) * 1.0f );
@@ -316,12 +319,10 @@ void ready() {
 	glBindVertexArray(0);
 
 	Boat::InitModel();
-
 	Flag::InitModel();
-
 	Lighthouse::InitModel();
-
 	Lightbeam::InitModel();
+	Sailor::InitGeometry();
 
 	rain.init();
 	smoke.init();
@@ -548,8 +549,8 @@ void update(float dt) {
 
 	//make the camera bob
 	glm::mat4 tmpView = camera.view;
-	camera.view = glm::translate(camera.view, glm::vec3(0, 0.1 + (sin(totalTime) * 0.1), 0));
-	
+	camera.view = glm::translate(camera.view, glm::vec3(0, 0.2 + (sin(totalTime) * 0.2), 0));
+
 	if (hasGameStarted) {
 		dramaUpdate(dt);	
 	}
@@ -568,9 +569,25 @@ void update(float dt) {
 	rain.update(dt);
 	rain.draw();
 
+
+	if (boat.hasBoatSunk && !smoke.isPaused) {
+		smoke.pause();
+	}
+	else if (smoke.isPaused && !boat.hasBoatSunk) {
+		smoke.unpause();
+	}
+
 	smoke.position = boat.smokeAnchorPoint();
 	smoke.update(dt);
 	smoke.draw();
+
+	//testSailor.update(dt);
+	//testSailor.draw();
+
+	for (int i = 0; i < testSailorNum; i++) {
+		testSailors[i].update(dt);
+		testSailors[i].draw();
+	}
 
 	camera.view = tmpView; //hack to keep base camera view stored
 }
@@ -580,7 +597,9 @@ void on_quit() {
 	Flag::DestroyModel();
 	Lighthouse::DestroyModel();
 	Lightbeam::DestroyModel();
+	Sailor::DestroyGeometry();
 	rain.cleanup();
+	smoke.cleanup();
 	//destroy the ocean model???
 }
 

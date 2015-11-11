@@ -14,7 +14,11 @@ class SmokeParticles: public ParticleSystem {
 		SmokeParticles();
 		void init();
 
+		void pause();
+		void unpause();
+
 		glm::vec3 position;
+		bool isPaused = false;
 
 	protected:
 		Particle* generateParticle(int i);

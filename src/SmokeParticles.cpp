@@ -48,6 +48,16 @@ void SmokeParticles::updateParticle(Particle* p, float dt) {
 	s->rotation.z += s->rotationSpeed * dt;
 }
 
+void SmokeParticles::pause() {
+	particleBurstCount = 0;
+	isPaused = true;
+}
+
+void SmokeParticles::unpause() {
+	particleBurstCount = 100;
+	isPaused = false;
+}
+
 Particle* SmokeParticles::generateParticle(int i) {
 	float rad;
 	if (i % 2 == 0) { //this is to help me draw from back to front (necessary for alpha - but why?)
@@ -63,7 +73,7 @@ Particle* SmokeParticles::generateParticle(int i) {
 	s->position = glm::vec3(position.x,position.y,position.z);
 	s->scale = glm::vec3(size, size, size);
 	s->rotation = glm::vec3(0,0,0);
-	s->velocity = glm::vec3(cos(rad) * 0.05, 0.3, sin(rad) * 0.05);
+	s->velocity = glm::vec3(cos(rad) * 0.05, 0.3, (sin(rad) * 0.05) - 0.3);
 	s->lifetime = 0;
 	s->rotationSpeed = rotSpeed;
 

@@ -26,6 +26,8 @@ class Boat {
 		glm::vec3 position;
 		glm::vec3 rotation;
 		glm::vec3 scale;
+		
+		bool hasBoatSunk;
 
 	private:
 		static glModelData model;
@@ -55,7 +57,6 @@ class Boat {
 		bool startedEntranceAnimation;
 		float entranceAnimationTimer;
 
-		bool hasBoatSunk;
 		float sinkTimer;
 
 		void untilt();

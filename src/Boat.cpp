@@ -457,7 +457,7 @@ void Boat::update(float dt) {
 	transform = glm::translate(transform, position); //position
 
 	//squash/stretch scaling
-	transform = glm::scale(transform, squashEffect);
+	if (!hasBoatSunk) transform = glm::scale(transform, squashEffect);
 
 	//rotation
 	transform = glm::rotate(transform, glm::radians(rotation.x), glm::vec3(1,0,0));
