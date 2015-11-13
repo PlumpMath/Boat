@@ -21,6 +21,7 @@ using std::string;
 #include <stdlib.h> 
 #include <math.h> 
 #define PI 3.14159265
+#include <vector>
 
 //my stuff
 #include "utils.h"
@@ -46,6 +47,9 @@ TODO:
 - credits & title
 - make flag hit into camera on its way out
 - jumping fish
+
+BUGS:
+- smoke particles overlapping creates weird effect
 
 for next gl project:
 - make uniforms more easy / automatic
@@ -158,8 +162,9 @@ Lighthouse lighthouse;
 RainParticles rain;
 SmokeParticles smoke;
 
-const int testSailorNum = 50;
-Sailor testSailors[testSailorNum];
+//const int testSailorNum = 50;
+//Sailor testSailors[testSailorNum];
+vector<Sailor> sailors;
 
 glm::vec3 randomWaveStartingPosition(float waveHeight) {
 	float rad = glm::radians( (rand() % 360) * 1.0f );
@@ -330,6 +335,14 @@ void ready() {
 	//random wave
 	startNewWave(curDifficulty);
 	flag.setRotYGoal(0);
+
+	//debug
+	/*
+	for (int i = 0; i < 10; i++) {
+		Sailor s;
+		sailors.push_back(s);
+	}
+	*/
 }
 
 void dramaUpdate(float dt) {
@@ -500,6 +513,13 @@ void waveUpdate(float dt) {
 					if (doesLightningStrikeOnWaveCollision) {
 						lightningTimer = 0;
 					}
+
+					//
+					glm::vec3 waveWorldPos = wavePosToWorldSpace(wavePos);
+					waveWorldPos.y = 0;
+					glm::vec3 fromBoat = glm::normalize(waveWorldPos - boat.worldPosition());
+					Sailor s(boat.worldPosition(), fromBoat);
+					sailors.push_back(s);
 				}
 			}
 		}
@@ -584,9 +604,27 @@ void update(float dt) {
 	//testSailor.update(dt);
 	//testSailor.draw();
 
+	/*
 	for (int i = 0; i < testSailorNum; i++) {
 		testSailors[i].update(dt);
 		testSailors[i].draw();
+	}
+	*/
+
+	for (int i = 0; i < sailors.size(); i++) {
+		sailors[i].update(dt);
+		sailors[i].draw();
+
+		if (sailors[i].collisionWithBoat(boat.worldPosition())) {
+			if (!boat.stunned()) {
+				sailors.erase(sailors.begin() + i); //hack method for now
+				break;
+			}
+		}
+		else if (sailors[i].goneOffScreen()) {
+			sailors.erase(sailors.begin() + i);
+			break;
+		}
 	}
 
 	camera.view = tmpView; //hack to keep base camera view stored

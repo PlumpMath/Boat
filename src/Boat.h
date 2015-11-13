@@ -22,6 +22,8 @@ class Boat {
 		void testBigWaveCollision(glm::vec3 wavePos);
 		glm::vec3 flagAnchorPoint();
 		glm::vec3 smokeAnchorPoint();
+		glm::vec3 worldPosition();
+		bool stunned(); //why won't public variables work? :(
 		
 		glm::vec3 position;
 		glm::vec3 rotation;
@@ -49,8 +51,8 @@ class Boat {
 		glm::vec3 goalRot, startRot;
 		float goalRotTimer;
 
-		bool isStunned;
 		float stunTimer;
+		bool isStunned;
 
 		float scaleNormFactor;
 

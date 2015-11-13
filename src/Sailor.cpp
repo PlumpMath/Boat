@@ -50,6 +50,22 @@ Sailor::Sailor() {
 	position = randomPositionInDropZone();
 	rotation = glm::vec3(0,0,0);
 	scale = glm::vec3(0.1, 0.1, 0.1);
+
+	mode = MODE_DRIFTING;
+}
+
+Sailor::Sailor(glm::vec3 tossStart, glm::vec3 tossDir) {
+	//position = randomPositionInDropZone();
+	float r = ((rand() % 100) / 100.0f);
+	dropPosition = tossStart + (tossDir * (minTossDist + ((maxTossDist - minTossDist) * r)));
+	startPosition = tossStart;
+	fallingTimer = 1.0f;
+	mode = MODE_FALLING;
+
+	position = startPosition;
+
+	rotation = glm::vec3(0,0,0);
+	scale = glm::vec3(0.1, 0.1, 0.1);
 }
 
 glm::vec3 Sailor::randomPositionInDropZone() {
@@ -61,7 +77,45 @@ glm::vec3 Sailor::randomPositionInDropZone() {
 }
 
 void Sailor::update(float dt) {
-	position.z -= driftSpeed * dt; //drift away
+	if (mode == MODE_DRIFTING) {
+		position.z -= driftSpeed * dt; //drift away
+	}
+	else if (mode == MODE_FALLING) {
+		fallingTimer -= dt;
+
+		if (fallingTimer > 0) {
+			//the sailor falls along a neville's curve (it's inefficient to do this calculation every frame, but oh well)
+			glm::vec3 a = startPosition;
+			glm::vec3 c = dropPosition;
+			glm::vec3 b = (a + ((c - a) * 0.5f)) + glm::vec3(0, 1, 0);
+
+			glm::vec3 ab = b - a;
+			glm::vec3 cb = b - c;
+
+			glm::vec3 abPos = a + (ab * 2.0f * (1 - fallingTimer));
+			glm::vec3 cbPos = c + (cb * 2.0f * (fallingTimer));
+
+			glm::vec3 nevillePos = abPos + ((cbPos - abPos) * (1 - fallingTimer));
+
+			position = nevillePos; //update the sailor
+		}
+		else {
+			position = dropPosition;
+			mode = MODE_DRIFTING;
+		}
+	}
+	else if (mode == MODE_RESCUING) {
+		rescueTimer -= dt;
+
+		if (rescueTimer > 0) {
+			//resuce animation
+		}
+		else {
+			scale = glm::vec3(0,0,0);
+			isRescued = true;
+		}
+	}
+	
 
 	updateTransform();
 }
@@ -77,6 +131,23 @@ void Sailor::updateTransform() {
 	transform = glm::rotate(transform, glm::radians(rotation.x), glm::vec3(1,0,0));
 	transform = glm::rotate(transform, glm::radians(rotation.y), glm::vec3(0,1,0));
 	transform = glm::rotate(transform, glm::radians(rotation.z), glm::vec3(0,0,1));
+}
+
+bool Sailor::collisionWithBoat(glm::vec3 boatPosition) {
+	//std::cout << glm::distance(boatPosition, position) << std::endl;
+	return (mode == MODE_DRIFTING) && (glm::distance(boatPosition, position) < 0.6f); //test number
+}
+
+bool Sailor::goneOffScreen() {
+	return position.z <= -2.3f;
+}
+
+void Sailor::rescue(glm::vec3 boatPosition) {
+	startPosition = position;
+	rescuePosition = boatPosition;
+	rescueTimer = 0.5f;
+
+	mode == MODE_RESCUING;
 }
 
 void Sailor::draw() {

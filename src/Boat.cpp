@@ -285,6 +285,12 @@ glm::vec3 Boat::smokeAnchorPoint() {
 	return glm::vec3(anchorInWorldSpace.x, anchorInWorldSpace.y, anchorInWorldSpace.z);
 }
 
+glm::vec3 Boat::worldPosition() {
+	glm::vec4 worldPos4 = transform * glm::vec4(position.x, position.y, position.z, 0);
+	glm::vec3 worldPos3 = glm::vec3(worldPos4.x, worldPos4.y, worldPos4.z);
+	return worldPos3;
+}
+
 void Boat::update(float dt) {
 	totalTime += dt;
 
@@ -481,6 +487,10 @@ void Boat::stunSpin(float dt) {
 	if (stunTimer > maxStunTime) {
 		isStunned = false;
 	}
+}
+
+bool Boat::stunned() {
+	return isStunned;
 }
 
 void Boat::onkeydown(string keyname) {
