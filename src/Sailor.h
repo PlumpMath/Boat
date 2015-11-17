@@ -14,7 +14,7 @@ class Sailor {
 		void draw();
 		bool collisionWithBoat(glm::vec3 boatPosition);
 		bool goneOffScreen();
-		void rescue(glm::vec3 boatPosition);
+		void rescue();
 		bool rescued();
 
 		glm::vec3 position;
@@ -22,10 +22,21 @@ class Sailor {
 		glm::vec3 scale;
 
 	private:
+		//body
 		static glModelData model_body;
 		static GLint uniProj_body;
 		static GLint uniView_body;
 		static GLint uniModel_body;
+
+		//head
+		static glModelData model_head;
+		static GLint uniProj_head;
+		static GLint uniView_head;
+		static GLint uniModel_head;
+
+		//arms
+
+		//floatie
 
 		glm::mat4 transform;
 
@@ -39,7 +50,6 @@ class Sailor {
 		glm::vec3 dropPosition;
 		float fallingTimer;
 
-		glm::vec3 rescuePosition;
 		float rescueTimer;
 		bool isRescued = false;
 

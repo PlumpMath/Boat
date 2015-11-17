@@ -72,17 +72,18 @@ void ParticleSystem::draw() {
 	glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(camera.proj));
 
 	//draw all the particles
+	/*
 	for (int i = 0; i < particles.size(); i++) {
 		//get particle data
 		drawParticle(particles[i]);
 	}
+	*/
 
-	/*
+	//hack for the smoke particles (there has to be a better way to design this)
 	for (int i = particles.size() - 1; i >= 0; i--) {
 		//get particle data
 		drawParticle(particles[i]);
 	}
-	*/
 		
 }
 

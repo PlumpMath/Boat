@@ -48,14 +48,17 @@ TODO:
 - make flag hit into camera on its way out
 - jumping fish
 
-BUGS:
-- smoke particles overlapping creates weird effect
+new ideas:
+- narration
+- rocks?
+- others?
 
 for next gl project:
 - make uniforms more easy / automatic
 - build a "game object base clas"
 - build a "3D model base class"
 - expand on particle system class
+- - better control of particle draw order (alpha particle problem)
 */
 
 glApp app;
@@ -597,35 +600,29 @@ void update(float dt) {
 		smoke.unpause();
 	}
 
-	smoke.position = boat.smokeAnchorPoint();
-	smoke.update(dt);
-	smoke.draw();
-
-	//testSailor.update(dt);
-	//testSailor.draw();
-
-	/*
-	for (int i = 0; i < testSailorNum; i++) {
-		testSailors[i].update(dt);
-		testSailors[i].draw();
-	}
-	*/
-
 	for (int i = 0; i < sailors.size(); i++) {
 		sailors[i].update(dt);
 		sailors[i].draw();
 
 		if (sailors[i].collisionWithBoat(boat.worldPosition())) {
 			if (!boat.stunned()) {
-				sailors.erase(sailors.begin() + i); //hack method for now
+				sailors[i].rescue();
 				break;
 			}
+		}
+		else if (sailors[i].rescued()) {
+			sailors.erase(sailors.begin() + i);
+			break;
 		}
 		else if (sailors[i].goneOffScreen()) {
 			sailors.erase(sailors.begin() + i);
 			break;
 		}
 	}
+
+	smoke.position = boat.smokeAnchorPoint();
+	smoke.update(dt);
+	smoke.draw();
 
 	camera.view = tmpView; //hack to keep base camera view stored
 }

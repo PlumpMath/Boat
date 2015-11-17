@@ -60,12 +60,23 @@ void SmokeParticles::unpause() {
 
 Particle* SmokeParticles::generateParticle(int i) {
 	float rad;
+	//sensible way (doesn't account for height)
+	/*
 	if (i % 2 == 0) { //this is to help me draw from back to front (necessary for alpha - but why?)
 		rad = glm::radians( 90 + ((i * 0.5f) / (particleBurstCount * 0.5f)) * 180.0f );
 	}
 	else {
 		rad = glm::radians( 90 + ((i * 0.5f) / (particleBurstCount * 0.5f)) * -180.0f );
 	}
+	*/
+	//nonsensical way (that works), and accounts for height (w/ help from base class)
+	if (i % 2 == 0) { //this is to help me draw from back to front (necessary for alpha - but why?)
+		rad = glm::radians( 180 + 90 + ((i * 0.5f) / (particleBurstCount * 0.5f)) * 180.0f );
+	}
+	else {
+		rad = glm::radians( 180 + 90 + ((i * 0.5f) / (particleBurstCount * 0.5f)) * -180.0f );
+	}
+
 	float size = 0.005 + (0.03 * ((rand() % 100) / 100.0f));
 	float rotSpeed = -100 + ((rand() % 200) * 1.0f);
 
