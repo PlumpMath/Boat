@@ -6,11 +6,17 @@ glModelData Sailor::model_body;
 GLint Sailor::uniProj_body;
 GLint Sailor::uniView_body;
 GLint Sailor::uniModel_body;
+GLint Sailor::uniColor1_body;
+GLint Sailor::uniColor2_body;
+GLint Sailor::uniLightning_body;
 
-glModelData Sailor::model_head;
-GLint Sailor::uniProj_head;
-GLint Sailor::uniView_head;
-GLint Sailor::uniModel_head;
+glModelData Sailor::model_floatie;
+GLint Sailor::uniProj_floatie;
+GLint Sailor::uniView_floatie;
+GLint Sailor::uniModel_floatie;
+GLint Sailor::uniColor1_floatie;
+GLint Sailor::uniColor2_floatie;
+GLint Sailor::uniLightning_floatie;
 
 void Sailor::InitGeometry() {
 	/*
@@ -42,8 +48,16 @@ void Sailor::InitGeometry() {
 	int numLayers = 6;
 	int numVerticesPerLayer = 8;
 
-	GLfloat vertices[numLayers * numVerticesPerLayer * 3];
-	GLuint elements[(numLayers - 1) * numVerticesPerLayer * 2 * 3];
+	float headRadius = 2;
+	int numHeadSlices = 8;
+
+	int countTorsoVertices = numLayers * numVerticesPerLayer * 4;
+	int countTorsoElements = (numLayers - 1) * numVerticesPerLayer * 2 * 3;
+	int countHeadVertices = numHeadSlices * numHeadSlices * 4;
+	int countHeadElements = (numHeadSlices - 1) * numHeadSlices * 2 * 3;
+
+	GLfloat vertices[countTorsoVertices + countHeadVertices];
+	GLuint elements[countTorsoElements + countHeadElements];
 
 	for (int i = 0; i < numLayers; i++) {
 		for (int j = 0; j < numVerticesPerLayer; j++) {
@@ -58,9 +72,10 @@ void Sailor::InitGeometry() {
 			float y = height * heightPercent; 
 			float z = sin(rad) * curWidth;
 
-			vertices[ (i * 3 * numVerticesPerLayer) + (j * 3) + 0 ] = x;
-			vertices[ (i * 3 * numVerticesPerLayer) + (j * 3) + 1 ] = y;
-			vertices[ (i * 3 * numVerticesPerLayer) + (j * 3) + 2 ] = z;
+			vertices[ (i * 4 * numVerticesPerLayer) + (j * 4) + 0 ] = x;
+			vertices[ (i * 4 * numVerticesPerLayer) + (j * 4) + 1 ] = y;
+			vertices[ (i * 4 * numVerticesPerLayer) + (j * 4) + 2 ] = z;
+			vertices[ (i * 4 * numVerticesPerLayer) + (j * 4) + 3 ] = 1; //color choice
 
 			if (i < numLayers - 1) {
 				int vert1 = (i * numVerticesPerLayer) + j;
@@ -77,27 +92,6 @@ void Sailor::InitGeometry() {
 			}
 		}
 	}
-
-	Sailor::model_body = buildModel(
-		"sailor_vert.glsl", "sailor_frag.glsl",
-		vertices, sizeof(vertices),
-		elements, sizeof(elements),
-		{
-			{"position", 3}
-		}
-	);
-
-	Sailor::uniProj_body = glGetUniformLocation(Sailor::model_body.shader.program, "proj");
-	Sailor::uniView_body = glGetUniformLocation(Sailor::model_body.shader.program, "view");
-	Sailor::uniModel_body = glGetUniformLocation(Sailor::model_body.shader.program, "model");
-
-
-	//HEAD
-	float headRadius = 2;
-	int numHeadSlices = 8;
-
-	GLfloat vertices_head[numHeadSlices * numHeadSlices * 3];
-	GLuint elements_head[(numHeadSlices - 1) * numHeadSlices * 2 * 3];
 	
 	for (int i = 0; i < numHeadSlices; i++) {
 		for (int j = 0; j < numHeadSlices; j++) {
@@ -120,49 +114,149 @@ void Sailor::InitGeometry() {
 			float y = height - 1 + (headRadius * 2 * heightPercent); 
 			float z = sin(rad) * curWidth;
 
-			vertices_head[ (i * 3 * numHeadSlices) + (j * 3) + 0 ] = x;
-			vertices_head[ (i * 3 * numHeadSlices) + (j * 3) + 1 ] = y;
-			vertices_head[ (i * 3 * numHeadSlices) + (j * 3) + 2 ] = z;
+			vertices[ countTorsoVertices + (i * 4 * numHeadSlices) + (j * 4) + 0 ] = x;
+			vertices[ countTorsoVertices + (i * 4 * numHeadSlices) + (j * 4) + 1 ] = y;
+			vertices[ countTorsoVertices + (i * 4 * numHeadSlices) + (j * 4) + 2 ] = z;
+			vertices[ countTorsoVertices + (i * 4 * numHeadSlices) + (j * 4) + 3 ] = 0; //color choice
 
 			if (i < numHeadSlices - 1) {
-				int vert1 = (i * numHeadSlices) + j;
-				int vert2 = (i * numHeadSlices) + ((j + 1) % numHeadSlices);
-				int vert3 = ((i + 1) * numHeadSlices) + j;
-				int vert4 = ((i + 1) * numHeadSlices) + ((j + 1) % numHeadSlices);
+				int vert1 = countTorsoVertices/4 + (i * numHeadSlices) + j;
+				int vert2 = countTorsoVertices/4 + (i * numHeadSlices) + ((j + 1) % numHeadSlices);
+				int vert3 = countTorsoVertices/4 + ((i + 1) * numHeadSlices) + j;
+				int vert4 = countTorsoVertices/4 + ((i + 1) * numHeadSlices) + ((j + 1) % numHeadSlices);
 
-				elements_head[ (i * 6 * numHeadSlices) + (j * 6) + 0 ] = vert1;
-				elements_head[ (i * 6 * numHeadSlices) + (j * 6) + 1 ] = vert2;
-				elements_head[ (i * 6 * numHeadSlices) + (j * 6) + 2 ] = vert4;
-				elements_head[ (i * 6 * numHeadSlices) + (j * 6) + 3 ] = vert1;
-				elements_head[ (i * 6 * numHeadSlices) + (j * 6) + 4 ] = vert3;
-				elements_head[ (i * 6 * numHeadSlices) + (j * 6) + 5 ] = vert4;
+				elements[ countTorsoElements + (i * 6 * numHeadSlices) + (j * 6) + 0 ] = vert1;
+				elements[ countTorsoElements + (i * 6 * numHeadSlices) + (j * 6) + 1 ] = vert2;
+				elements[ countTorsoElements + (i * 6 * numHeadSlices) + (j * 6) + 2 ] = vert4;
+				elements[ countTorsoElements + (i * 6 * numHeadSlices) + (j * 6) + 3 ] = vert1;
+				elements[ countTorsoElements + (i * 6 * numHeadSlices) + (j * 6) + 4 ] = vert3;
+				elements[ countTorsoElements + (i * 6 * numHeadSlices) + (j * 6) + 5 ] = vert4;
 			}
 		}
 	}
 
-	Sailor::model_head = buildModel(
+	Sailor::model_body = buildModel(
 		"sailor_vert.glsl", "sailor_frag.glsl",
-		vertices_head, sizeof(vertices_head),
-		elements_head, sizeof(elements_head),
+		vertices, sizeof(vertices),
+		elements, sizeof(elements),
 		{
-			{"position", 3}
+			{"position", 3},
+			{"colorChoice", 1}
 		}
 	);
 
-	Sailor::uniProj_head = glGetUniformLocation(Sailor::model_head.shader.program, "proj");
-	Sailor::uniView_head = glGetUniformLocation(Sailor::model_head.shader.program, "view");
-	Sailor::uniModel_head = glGetUniformLocation(Sailor::model_head.shader.program, "model");
+	Sailor::uniProj_body = glGetUniformLocation(Sailor::model_body.shader.program, "proj");
+	Sailor::uniView_body = glGetUniformLocation(Sailor::model_body.shader.program, "view");
+	Sailor::uniModel_body = glGetUniformLocation(Sailor::model_body.shader.program, "model");
+	Sailor::uniColor1_body = glGetUniformLocation(Sailor::model_body.shader.program, "primaryColor");
+	Sailor::uniColor2_body = glGetUniformLocation(Sailor::model_body.shader.program, "secondaryColor");
+	Sailor::uniLightning_body = glGetUniformLocation(Sailor::model_body.shader.program, "lightningTimer");
+
+
+	glBindVertexArray(Sailor::model_body.vao);
+	glUseProgram(Sailor::model_body.shader.program);
+
+	glUniform3f(uniColor2_body, 0.2, 0.4, 1);
+
+	glBindVertexArray(0);
+
+	//FLOATIE
+	float floatieRadius = 4;
+	int numFloatieSlices = 20;
+	float tubeRadius = 1;
+	int numTubeSlices = 8;
+
+	GLfloat vertices_floatie[numFloatieSlices * numTubeSlices * 4];
+	GLuint elements_floatie[numFloatieSlices * numTubeSlices * 2 * 3];
+
+	for (int i = 0; i < numFloatieSlices; i++) {
+		
+		float floatieDeg = 360.0f * ((i * 1.0f) / (numFloatieSlices - 1));
+		float floatieRadians = glm::radians(floatieDeg);
+		glm::vec3 unit = glm::vec3(sin(floatieRadians), 0, cos(floatieRadians));
+		glm::vec3 centerPos = unit * floatieRadius;
+
+		for (int j = 0; j < numTubeSlices; j++) {
+
+			float tubeDeg = 360.0f * ((j * 1.0f) / (numTubeSlices - 1));
+			float tubeRadians = glm::radians(tubeDeg);
+
+			float s = sin(tubeRadians);
+			glm::vec3 tubePos = (unit * s) + glm::vec3(0, cos(tubeRadians), 0);
+			tubePos = tubePos * tubeRadius;
+			tubePos = centerPos + tubePos;
+
+			vertices_floatie[ (i * 4 * numTubeSlices) + (j * 4) + 0 ] = tubePos.x;
+			vertices_floatie[ (i * 4 * numTubeSlices) + (j * 4) + 1 ] = tubePos.y;
+			vertices_floatie[ (i * 4 * numTubeSlices) + (j * 4) + 2 ] = tubePos.z;
+
+			if (i % (numFloatieSlices / 4) == 2) {
+				vertices_floatie[ (i * 4 * numTubeSlices) + (j * 4) + 3 ] = 1; //color choice
+			}
+			else {
+				vertices_floatie[ (i * 4 * numTubeSlices) + (j * 4) + 3 ] = 0; //color choice
+			}
+			
+			int vert1 = (i * numTubeSlices) + j;
+			int vert2 = (i * numTubeSlices) + ((j + 1) % numTubeSlices);
+			int vert3 = (((i + 1) % numFloatieSlices) * numTubeSlices) + j;
+			int vert4 = (((i + 1) % numFloatieSlices) * numTubeSlices) + ((j + 1) % numTubeSlices);
+
+			elements_floatie[ (i * 6 * numTubeSlices) + (j * 6) + 0 ] = vert1;
+			elements_floatie[ (i * 6 * numTubeSlices) + (j * 6) + 1 ] = vert2;
+			elements_floatie[ (i * 6 * numTubeSlices) + (j * 6) + 2 ] = vert4;
+			elements_floatie[ (i * 6 * numTubeSlices) + (j * 6) + 3 ] = vert1;
+			elements_floatie[ (i * 6 * numTubeSlices) + (j * 6) + 4 ] = vert3;
+			elements_floatie[ (i * 6 * numTubeSlices) + (j * 6) + 5 ] = vert4;
+
+			/*
+			if (vert4 < vert3) { //for coloring purposes
+				elements_floatie[ (i * 6 * numTubeSlices) + (j * 6) + 0 ] = vert1;
+				elements_floatie[ (i * 6 * numTubeSlices) + (j * 6) + 1 ] = vert2;
+				elements_floatie[ (i * 6 * numTubeSlices) + (j * 6) + 2 ] = vert4;
+				elements_floatie[ (i * 6 * numTubeSlices) + (j * 6) + 3 ] = vert1;
+				elements_floatie[ (i * 6 * numTubeSlices) + (j * 6) + 4 ] = vert3;
+				elements_floatie[ (i * 6 * numTubeSlices) + (j * 6) + 5 ] = vert4;
+			}
+			*/
+		}
+	}
+
+	Sailor::model_floatie = buildModel(
+		"sailor_vert.glsl", "sailor_frag.glsl",
+		vertices_floatie, sizeof(vertices_floatie),
+		elements_floatie, sizeof(elements_floatie),
+		{
+			{"position", 3},
+			{"colorChoice", 1}
+		}
+	);
+
+	Sailor::uniProj_floatie = glGetUniformLocation(Sailor::model_floatie.shader.program, "proj");
+	Sailor::uniView_floatie = glGetUniformLocation(Sailor::model_floatie.shader.program, "view");
+	Sailor::uniModel_floatie = glGetUniformLocation(Sailor::model_floatie.shader.program, "model");
+	Sailor::uniColor1_floatie = glGetUniformLocation(Sailor::model_floatie.shader.program, "primaryColor");
+	Sailor::uniColor2_floatie = glGetUniformLocation(Sailor::model_floatie.shader.program, "secondaryColor");
+	Sailor::uniLightning_floatie = glGetUniformLocation(Sailor::model_floatie.shader.program, "lightningTimer");
+
+	glBindVertexArray(Sailor::model_floatie.vao);
+	glUseProgram(Sailor::model_floatie.shader.program);
+
+	glUniform3f(uniColor1_floatie, 1, 1, 1);
+	glUniform3f(uniColor2_floatie, 1, 0.2, 0);
+
+	glBindVertexArray(0);
 }
 
 void Sailor::DestroyGeometry() {
 	destroyModel(Sailor::model_body);
-	destroyModel(Sailor::model_head);
+	destroyModel(Sailor::model_floatie);
 }
 
 Sailor::Sailor() {
 	position = randomPositionInDropZone();
 	rotation = glm::vec3(0,0,0);
-	scale = glm::vec3(0.1, 0.1, 0.1);
+	scale = glm::vec3(baseScale.x, baseScale.y, baseScale.z);
 
 	mode = MODE_DRIFTING;
 }
@@ -170,6 +264,8 @@ Sailor::Sailor() {
 Sailor::Sailor(glm::vec3 tossStart, glm::vec3 tossDir) {
 	//float r = ((rand() % 100) / 100.0f);
 	//dropPosition = tossStart + (tossDir * (minTossDist + ((maxTossDist - minTossDist) * r)));
+
+	std::cout << "NEW SAILOR" << std::endl;
 
 	dropPosition = randomPositionInDropZone();
 	startPosition = tossStart;
@@ -179,7 +275,28 @@ Sailor::Sailor(glm::vec3 tossStart, glm::vec3 tossDir) {
 	position = startPosition;
 
 	rotation = glm::vec3(0,0,0);
-	scale = glm::vec3(0.05, 0.05, 0.05);
+	scale = glm::vec3(baseScale.x, baseScale.y, baseScale.z);
+
+	std::cout << scale.x << std::endl;
+
+	//skintone
+	glm::vec3 skintone1 = glm::vec3(0.26, 0, 0);
+	glm::vec3 skintone2 = glm::vec3(0.73, 0.42, 0.29);
+	glm::vec3 skintone3 = glm::vec3(1, 0.87, 0.77);
+
+	skintoneChoice = glm::vec3(0, 1, 0);
+	int choice = rand() % 3;
+	if (choice == 0) {
+		skintoneChoice = skintone1;
+	}
+	else if (choice == 1) {
+		skintoneChoice = skintone2;
+	}
+	else if (choice == 2) {
+		skintoneChoice = skintone3;
+	}
+
+	std::cout << skintoneChoice.x << " " << skintoneChoice.y << " " << skintoneChoice.z << std::endl;
 }
 
 glm::vec3 Sailor::randomPositionInDropZone() {
@@ -231,7 +348,7 @@ void Sailor::update(float dt) {
 				glm::vec3 upPos = startPosition + glm::vec3(0, 1.5, 0);
 				glm::vec3 endPos = boat.worldPosition() + glm::vec3(0, 0.5, 0);
 				position = upPos + ( (1 - ((rescueTimer) / 0.1f)) * (endPos - upPos) );
-				scale = (rescueTimer / 0.1f) * glm::vec3(0.05, 0.05, 0.05); //shrink
+				scale = (rescueTimer / 0.1f) * baseScale; //shrink
 			}
 		}
 		else {
@@ -289,20 +406,29 @@ void Sailor::draw() {
 	//update transform
 	glUniformMatrix4fv(Sailor::uniModel_body, 1, GL_FALSE, glm::value_ptr(transform));
 
+	//special effects
+	glUniform3f(uniColor1_body, this->skintoneChoice.x, this->skintoneChoice.y, this->skintoneChoice.z);
+	glUniform1f(uniLightning_body, lightningTimer);
+
 	//draw
 	drawModel(Sailor::model_body);
 
+	//
+
 	//bind model --- abstract into function?
-	glBindVertexArray(Sailor::model_head.vao);
-	glUseProgram(Sailor::model_head.shader.program); //only the shader is necessary for uniforms
+	glBindVertexArray(Sailor::model_floatie.vao);
+	glUseProgram(Sailor::model_floatie.shader.program); //only the shader is necessary for uniforms
 
 	//update camera
-	glUniformMatrix4fv(Sailor::uniView_head, 1, GL_FALSE, glm::value_ptr(camera.view));
-	glUniformMatrix4fv(Sailor::uniProj_head, 1, GL_FALSE, glm::value_ptr(camera.proj));
+	glUniformMatrix4fv(Sailor::uniView_floatie, 1, GL_FALSE, glm::value_ptr(camera.view));
+	glUniformMatrix4fv(Sailor::uniProj_floatie, 1, GL_FALSE, glm::value_ptr(camera.proj));
 
 	//update transform
-	glUniformMatrix4fv(Sailor::uniModel_head, 1, GL_FALSE, glm::value_ptr(transform));
+	glUniformMatrix4fv(Sailor::uniModel_floatie, 1, GL_FALSE, glm::value_ptr(transform));
+
+	//special effects
+	glUniform1f(uniLightning_floatie, lightningTimer);
 
 	//draw
-	drawModel(Sailor::model_head);
+	drawModel(Sailor::model_floatie);
 }

@@ -1,6 +1,6 @@
 #version 150
 
-in vec3 vertColor;
+flat in vec3 vertColor;
 out vec4 outColor;
 
 void main() {

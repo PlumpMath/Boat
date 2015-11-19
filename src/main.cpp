@@ -41,6 +41,7 @@ using std::string;
 /*
 TODO:
 - sailors
+- - SAILOR COLORS & SHADER & ANIMATION
 - package shaders with .app
 - sound
 - cross platform distribution
@@ -564,6 +565,8 @@ void rotateCameraForTesting(float dt) {
 }
 
 void update(float dt) {
+
+	//std::cout << sailors.size() << std::endl;
 
 	totalTime += dt;
 	//lightningTimer += dt; //debug only

@@ -27,18 +27,23 @@ class Sailor {
 		static GLint uniProj_body;
 		static GLint uniView_body;
 		static GLint uniModel_body;
-
-		//head
-		static glModelData model_head;
-		static GLint uniProj_head;
-		static GLint uniView_head;
-		static GLint uniModel_head;
+		static GLint uniColor1_body;
+		static GLint uniColor2_body;
+		static GLint uniLightning_body;
 
 		//arms
 
 		//floatie
+		static glModelData model_floatie;
+		static GLint uniProj_floatie;
+		static GLint uniView_floatie;
+		static GLint uniModel_floatie;
+		static GLint uniColor1_floatie;
+		static GLint uniColor2_floatie;
+		static GLint uniLightning_floatie;
 
 		glm::mat4 transform;
+		glm::vec3 baseScale = glm::vec3(0.025, 0.025, 0.025);
 
 		float driftSpeed = 0.2f;
 
@@ -57,6 +62,8 @@ class Sailor {
 		int MODE_DRIFTING = 1;
 		int MODE_RESCUING = 2;
 		int mode;
+
+		glm::vec3 skintoneChoice;
 
 		void updateTransform();
 		glm::vec3 randomPositionInDropZone();
