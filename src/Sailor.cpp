@@ -9,6 +9,7 @@ GLint Sailor::uniModel_body;
 GLint Sailor::uniColor1_body;
 GLint Sailor::uniColor2_body;
 GLint Sailor::uniLightning_body;
+GLint Sailor::uniStorm_body;
 
 glModelData Sailor::model_floatie;
 GLint Sailor::uniProj_floatie;
@@ -17,30 +18,18 @@ GLint Sailor::uniModel_floatie;
 GLint Sailor::uniColor1_floatie;
 GLint Sailor::uniColor2_floatie;
 GLint Sailor::uniLightning_floatie;
+GLint Sailor::uniStorm_floatie;
+
+glModelData Sailor::model_limb;
+GLint Sailor::uniProj_limb;
+GLint Sailor::uniView_limb;
+GLint Sailor::uniModel_limb;
+GLint Sailor::uniColor1_limb;
+GLint Sailor::uniColor2_limb;
+GLint Sailor::uniLightning_limb;
+GLint Sailor::uniStorm_limb;
 
 void Sailor::InitGeometry() {
-	/*
-	GLfloat vertices[] = { //test geometry
-		-1, 1, 1,
-		1, 1, 1,
-		1, -1, 1,
-		-1, -1, 1,
-		-1, 1, -1,
-		1, 1, -1,
-		1, -1, -1,
-		-1, -1, -1,
-	};
-
-	GLuint elements[] = {
-		0, 1, 2,
-		0, 3, 2,
-		4, 5, 6,
-		4, 7, 6,
-		0, 4, 5,
-		0, 5, 1,
-	};
-	*/
-
 	//BODY
 	float minWidth = 1;
 	float maxWidth = 2;
@@ -151,6 +140,7 @@ void Sailor::InitGeometry() {
 	Sailor::uniColor1_body = glGetUniformLocation(Sailor::model_body.shader.program, "primaryColor");
 	Sailor::uniColor2_body = glGetUniformLocation(Sailor::model_body.shader.program, "secondaryColor");
 	Sailor::uniLightning_body = glGetUniformLocation(Sailor::model_body.shader.program, "lightningTimer");
+	Sailor::uniStorm_body = glGetUniformLocation(Sailor::model_body.shader.program, "storminess");
 
 
 	glBindVertexArray(Sailor::model_body.vao);
@@ -208,17 +198,6 @@ void Sailor::InitGeometry() {
 			elements_floatie[ (i * 6 * numTubeSlices) + (j * 6) + 3 ] = vert1;
 			elements_floatie[ (i * 6 * numTubeSlices) + (j * 6) + 4 ] = vert3;
 			elements_floatie[ (i * 6 * numTubeSlices) + (j * 6) + 5 ] = vert4;
-
-			/*
-			if (vert4 < vert3) { //for coloring purposes
-				elements_floatie[ (i * 6 * numTubeSlices) + (j * 6) + 0 ] = vert1;
-				elements_floatie[ (i * 6 * numTubeSlices) + (j * 6) + 1 ] = vert2;
-				elements_floatie[ (i * 6 * numTubeSlices) + (j * 6) + 2 ] = vert4;
-				elements_floatie[ (i * 6 * numTubeSlices) + (j * 6) + 3 ] = vert1;
-				elements_floatie[ (i * 6 * numTubeSlices) + (j * 6) + 4 ] = vert3;
-				elements_floatie[ (i * 6 * numTubeSlices) + (j * 6) + 5 ] = vert4;
-			}
-			*/
 		}
 	}
 
@@ -238,6 +217,7 @@ void Sailor::InitGeometry() {
 	Sailor::uniColor1_floatie = glGetUniformLocation(Sailor::model_floatie.shader.program, "primaryColor");
 	Sailor::uniColor2_floatie = glGetUniformLocation(Sailor::model_floatie.shader.program, "secondaryColor");
 	Sailor::uniLightning_floatie = glGetUniformLocation(Sailor::model_floatie.shader.program, "lightningTimer");
+	Sailor::uniStorm_floatie = glGetUniformLocation(Sailor::model_floatie.shader.program, "storminess");
 
 	glBindVertexArray(Sailor::model_floatie.vao);
 	glUseProgram(Sailor::model_floatie.shader.program);
@@ -246,19 +226,94 @@ void Sailor::InitGeometry() {
 	glUniform3f(uniColor2_floatie, 1, 0.2, 0);
 
 	glBindVertexArray(0);
+
+	//LIMB
+	GLfloat vertices_limb[] = {
+		-(maxWidth / 4), 0, 0,		0,
+		(maxWidth / 4), 0, 0,		0,
+		-(maxWidth / 4), -(height * 1.5f),	0,		0,
+		(maxWidth / 4), -(height * 1.5f),	0,		0,
+		-(maxWidth / 4), 0, -(maxWidth / 4),		0,
+		(maxWidth / 4), 0, -(maxWidth / 4),			0,
+		-(maxWidth / 4), -(height * 1.5f),	-(maxWidth / 4),		0,
+		(maxWidth / 4), -(height * 1.5f),	-(maxWidth / 4),		0,
+	};
+
+	GLuint elements_limb[] = {
+		0, 1, 2,
+		1, 2, 3,
+
+		4, 5, 6,
+		5, 6, 7,
+		
+		0, 4, 5,
+		0, 1, 5,
+		
+		0, 2, 4,
+		2, 4, 6,
+
+		1, 3, 5,
+		5, 3, 7
+
+	};
+
+	Sailor::model_limb = buildModel(
+		"sailor_vert.glsl", "sailor_frag.glsl",
+		vertices_limb, sizeof(vertices_limb),
+		elements_limb, sizeof(elements_limb),
+		{
+			{"position", 3},
+			{"colorChoice", 1}
+		}
+	);
+
+	Sailor::uniProj_limb = glGetUniformLocation(Sailor::model_limb.shader.program, "proj");
+	Sailor::uniView_limb = glGetUniformLocation(Sailor::model_limb.shader.program, "view");
+	Sailor::uniModel_limb = glGetUniformLocation(Sailor::model_limb.shader.program, "model");
+	Sailor::uniColor1_limb = glGetUniformLocation(Sailor::model_limb.shader.program, "primaryColor");
+	Sailor::uniColor2_limb = glGetUniformLocation(Sailor::model_limb.shader.program, "secondaryColor");
+	Sailor::uniLightning_limb = glGetUniformLocation(Sailor::model_limb.shader.program, "lightningTimer");
+	Sailor::uniStorm_limb = glGetUniformLocation(Sailor::model_limb.shader.program, "storminess");
+
+	glBindVertexArray(Sailor::model_limb.vao);
+	glUseProgram(Sailor::model_limb.shader.program);
+
+	glUniform3f(uniColor2_limb, 1, 1, 1); //set this but we're never actually using it
+
+	glBindVertexArray(0);
 }
 
 void Sailor::DestroyGeometry() {
 	destroyModel(Sailor::model_body);
 	destroyModel(Sailor::model_floatie);
+	destroyModel(Sailor::model_limb);
 }
 
 Sailor::Sailor() {
-	position = randomPositionInDropZone();
+	position = randomPositionInDropZone() - glm::vec3(0, 0.5, 0);
 	rotation = glm::vec3(0,0,0);
 	scale = glm::vec3(baseScale.x, baseScale.y, baseScale.z);
 
 	mode = MODE_DRIFTING;
+
+	//skintone
+	glm::vec3 skintone1 = glm::vec3(0.26, 0, 0);
+	glm::vec3 skintone2 = glm::vec3(0.73, 0.42, 0.29);
+	glm::vec3 skintone3 = glm::vec3(1, 0.87, 0.77);
+
+	skintoneChoice = glm::vec3(0, 1, 0);
+	int choice = rand() % 3;
+	if (choice == 0) {
+		skintoneChoice = skintone1;
+	}
+	else if (choice == 1) {
+		skintoneChoice = skintone2;
+	}
+	else if (choice == 2) {
+		skintoneChoice = skintone3;
+	}
+
+	splashDownDepth = 0.5f;
 }
 
 Sailor::Sailor(glm::vec3 tossStart, glm::vec3 tossDir) {
@@ -296,6 +351,8 @@ Sailor::Sailor(glm::vec3 tossStart, glm::vec3 tossDir) {
 		skintoneChoice = skintone3;
 	}
 
+	splashDownDepth = 0.5f;
+
 	std::cout << skintoneChoice.x << " " << skintoneChoice.y << " " << skintoneChoice.z << std::endl;
 }
 
@@ -310,6 +367,14 @@ glm::vec3 Sailor::randomPositionInDropZone() {
 void Sailor::update(float dt) {
 	if (mode == MODE_DRIFTING) {
 		position.z -= driftSpeed * dt; //drift away
+
+		float bobWithBoat = (0.06 * (1 + storminess) * sin(totalTime * 0.5 * 8) / 2); //lotsa magic numbers
+		position.y = bobWithBoat + 0.1f;
+
+		if (splashDownDepth > 0) {
+			splashDownDepth -= 1 * dt;
+			position.y -= splashDownDepth;
+		}
 	}
 	else if (mode == MODE_FALLING) {
 		fallingTimer -= dt;
@@ -329,9 +394,13 @@ void Sailor::update(float dt) {
 			glm::vec3 nevillePos = abPos + ((cbPos - abPos) * (1 - fallingTimer));
 
 			position = nevillePos; //update the sailor
+
+			rotation.z = 360 * 2 * fallingTimer;
 		}
 		else {
+			splashes.splash( glm::vec3(dropPosition.x, 0, dropPosition.z) );
 			position = dropPosition;
+			rotation.z = 0;
 			mode = MODE_DRIFTING;
 		}
 	}
@@ -340,15 +409,35 @@ void Sailor::update(float dt) {
 
 		if (rescueTimer > 0) {
 			//resuce animation
-			if (rescueTimer > 0.1f) {
-				position = startPosition + ( (1 - ((rescueTimer - 0.1f) / 0.4f)) * glm::vec3(0, 1.5, 0) );
-				std::cout << position.y << std::endl;
+			float maxHeight = 0.8f;
+			if (rescueTimer > 0.7f) {
+				float d = (1 - ((rescueTimer - 0.7f) / 0.3f));
+				position = boat.worldPosition() + glm::vec3(0, 0.2, 0) + ( d * glm::vec3(0, maxHeight - 0.2f, 0) );
+				scale = baseScale + (d * 0.5f * baseScale);
+			}
+			else if (rescueTimer > 0.4f) {
+				position = boat.worldPosition() + glm::vec3(0, maxHeight, 0); //stay over the boat
+				//make a happy tilt-y animation?
+				float d = (1 - ((rescueTimer - 0.4f) / 0.2f));
+				float tiltDeg = 20;
+				if (d < 0.25f) {
+					rotation.z = tiltDeg * (d / 0.25f);
+				}
+				else if (d < 0.75f) {
+					rotation.z = tiltDeg - ( tiltDeg * 2 * ((d - 0.25f) / 0.5f) );
+				}
+				else {
+					rotation.z = -tiltDeg + ( tiltDeg * ((d - 0.5f) / 0.25f) );
+				}
 			}
 			else {
-				glm::vec3 upPos = startPosition + glm::vec3(0, 1.5, 0);
-				glm::vec3 endPos = boat.worldPosition() + glm::vec3(0, 0.5, 0);
-				position = upPos + ( (1 - ((rescueTimer) / 0.1f)) * (endPos - upPos) );
-				scale = (rescueTimer / 0.1f) * baseScale; //shrink
+				float d = (rescueTimer / 0.4f);
+				float d2 = 1 - d;
+				glm::vec3 upPos = boat.worldPosition() + glm::vec3(0, maxHeight, 0);
+				glm::vec3 endPos = boat.sailorPickupAnchorPoint();
+				position = upPos + ( d2 * (endPos - upPos) );
+				scale = d * baseScale * 1.5f; //shrink
+				rotation.z = 0;
 			}
 		}
 		else {
@@ -377,6 +466,7 @@ void Sailor::updateTransform() {
 bool Sailor::collisionWithBoat(glm::vec3 boatPosition) {
 	//std::cout << glm::distance(boatPosition, position) << std::endl;
 	return (mode == MODE_DRIFTING) && (glm::distance(boatPosition, position) < 0.6f); //test number
+	//return (mode == MODE_DRIFTING) && (glm::distance(boatPosition, position) < 1.0f);
 }
 
 bool Sailor::goneOffScreen() {
@@ -385,7 +475,7 @@ bool Sailor::goneOffScreen() {
 
 void Sailor::rescue() {
 	startPosition = glm::vec3(position.x, position.y, position.z);
-	rescueTimer = 0.5f;
+	rescueTimer = 1.0f;
 
 	mode = MODE_RESCUING;
 }
@@ -409,6 +499,7 @@ void Sailor::draw() {
 	//special effects
 	glUniform3f(uniColor1_body, this->skintoneChoice.x, this->skintoneChoice.y, this->skintoneChoice.z);
 	glUniform1f(uniLightning_body, lightningTimer);
+	glUniform1f(uniStorm_body, storminess);
 
 	//draw
 	drawModel(Sailor::model_body);
@@ -428,7 +519,57 @@ void Sailor::draw() {
 
 	//special effects
 	glUniform1f(uniLightning_floatie, lightningTimer);
+	glUniform1f(uniStorm_floatie, storminess);
 
 	//draw
 	drawModel(Sailor::model_floatie);
+
+	//
+
+	//bind model --- abstract into function?
+	glBindVertexArray(Sailor::model_limb.vao);
+	glUseProgram(Sailor::model_limb.shader.program); //only the shader is necessary for uniforms
+
+	//update camera
+	glUniformMatrix4fv(Sailor::uniView_limb, 1, GL_FALSE, glm::value_ptr(camera.view));
+	glUniformMatrix4fv(Sailor::uniProj_limb, 1, GL_FALSE, glm::value_ptr(camera.proj));
+
+	//special effects
+	glUniform1f(uniLightning_limb, lightningTimer);
+	glUniform1f(uniStorm_limb, storminess);
+
+	//LEGS
+	glUniform3f(uniColor1_limb, 0.2, 0.4, 1);
+	//LEFT
+	glm::mat4 tr1 = glm::mat4();
+	tr1 = glm::translate(tr1, glm::vec3(-1, 0, 0));
+	tr1 = transform * tr1;
+	glUniformMatrix4fv(Sailor::uniModel_limb, 1, GL_FALSE, glm::value_ptr(tr1));
+	drawModel(Sailor::model_limb);
+	//RIGHT
+	glm::mat4 tr2 = glm::mat4();
+	tr2 = glm::translate(tr2, glm::vec3(1, 0, 0));
+	tr2 = transform * tr2;
+	glUniformMatrix4fv(Sailor::uniModel_limb, 1, GL_FALSE, glm::value_ptr(tr2));
+	drawModel(Sailor::model_limb);
+
+	//ARMS
+	glUniform3f(uniColor1_limb, this->skintoneChoice.x, this->skintoneChoice.y, this->skintoneChoice.z);
+	float waveDeg = 20;
+	//LEFT
+	glm::mat4 tr3 = glm::mat4();
+	tr3 = glm::translate(tr3, glm::vec3(0,1.5,0));
+	float deg1 = (90 + waveDeg) + (sin(totalTime * 8) * waveDeg);
+	tr3 = glm::rotate(tr3, glm::radians(deg1), glm::vec3(0,0,1));
+	tr3 = transform * tr3;
+	glUniformMatrix4fv(Sailor::uniModel_limb, 1, GL_FALSE, glm::value_ptr(tr3));
+	drawModel(Sailor::model_limb);
+	//RIGHT
+	glm::mat4 tr4 = glm::mat4();
+	tr4 = glm::translate(tr4, glm::vec3(0,1.5,0));
+	float deg2 = -(90 + waveDeg) + (-1 * sin(totalTime * 8) * waveDeg);
+	tr4 = glm::rotate(tr4, glm::radians(deg2), glm::vec3(0,0,1));
+	tr4 = transform * tr4;
+	glUniformMatrix4fv(Sailor::uniModel_limb, 1, GL_FALSE, glm::value_ptr(tr4));
+	drawModel(Sailor::model_limb);
 }

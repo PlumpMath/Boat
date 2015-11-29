@@ -285,6 +285,13 @@ glm::vec3 Boat::smokeAnchorPoint() {
 	return glm::vec3(anchorInWorldSpace.x, anchorInWorldSpace.y, anchorInWorldSpace.z);
 }
 
+glm::vec3 Boat::sailorPickupAnchorPoint() {
+	glm::vec4 anchorInLocalSpace = glm::vec4(0, 7.5, 4, 0);
+	glm::vec4 anchorInWorldSpace = transform * anchorInLocalSpace;
+	anchorInWorldSpace += glm::vec4(position.x * scale.x, position.y * scale.y, position.z * scale.z, 0);
+	return glm::vec3(anchorInWorldSpace.x, anchorInWorldSpace.y, anchorInWorldSpace.z);
+}
+
 glm::vec3 Boat::worldPosition() {
 	glm::vec4 worldPos4 = transform * glm::vec4(position.x, position.y, position.z, 0);
 	glm::vec3 worldPos3 = glm::vec3(worldPos4.x, worldPos4.y, worldPos4.z);
@@ -463,7 +470,7 @@ void Boat::update(float dt) {
 	transform = glm::translate(transform, position); //position
 
 	//squash/stretch scaling
-	if (!hasBoatSunk) transform = glm::scale(transform, squashEffect);
+	if (!hasBoatSunk && !isStunned) transform = glm::scale(transform, squashEffect);
 
 	//rotation
 	transform = glm::rotate(transform, glm::radians(rotation.x), glm::vec3(1,0,0));

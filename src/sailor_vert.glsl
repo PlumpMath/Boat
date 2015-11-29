@@ -9,6 +9,7 @@ uniform mat4 model;
 uniform vec3 primaryColor;
 uniform vec3 secondaryColor;
 uniform float lightningTimer;
+uniform float storminess;
 
 flat out vec3 vertColor;
 
@@ -22,6 +23,7 @@ void main() {
 	else {
 		vertColor = secondaryColor;
 	}
+	vertColor = vertColor * (1 - (0.5 * storminess));
 
 	//lightning
 	vec3 lightningColor = vec3(1,1,1);

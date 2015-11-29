@@ -36,18 +36,24 @@ using std::string;
 #include "RainParticles.h"
 #include "SmokeParticles.h"
 #include "Sailor.h"
+#include "SplashParticles.h"
 
 
 /*
 TODO:
 - sailors
-- - SAILOR COLORS & SHADER & ANIMATION
 - package shaders with .app
 - sound
 - cross platform distribution
 - credits & title
 - make flag hit into camera on its way out
 - jumping fish
+
+SAILOR TODO:
+- sailors come back after the big wave
+
+BOAT POLISH:
+- improve boat colors?
 
 new ideas:
 - narration
@@ -165,6 +171,7 @@ Lighthouse lighthouse;
 
 RainParticles rain;
 SmokeParticles smoke;
+SplashParticles splashes;
 
 //const int testSailorNum = 50;
 //Sailor testSailors[testSailorNum];
@@ -335,18 +342,17 @@ void ready() {
 
 	rain.init();
 	smoke.init();
+	splashes.init();
 
 	//random wave
 	startNewWave(curDifficulty);
 	flag.setRotYGoal(0);
 
 	//debug
-	/*
-	for (int i = 0; i < 10; i++) {
+	for (int i = 0; i < 3; i++) {
 		Sailor s;
 		sailors.push_back(s);
 	}
-	*/
 }
 
 void dramaUpdate(float dt) {
@@ -401,6 +407,26 @@ void dramaUpdate(float dt) {
 		lighthouse.moveTo(glm::vec3(2, -0.4, 2), 30);
 		lighthouseMoveCounter++;
 	}
+	//LIGHTHOUSE MOVES FORWARDS = not very noticeable
+	/*
+	if (totalPlayTime > 2 && lighthouseMoveCounter < 1) {
+		lighthouse.moveTo(glm::vec3(6, -3.7, 10), startOfStormTime - 2);
+		lighthouseMoveCounter++;
+	}
+	else if (totalPlayTime > hardModeTime && lighthouseMoveCounter < 2) {
+		lighthouse.moveTo(glm::vec3(6, -3.7, 8), 0.01);
+		lighthouseMoveCounter++;
+	}
+	else if (totalPlayTime > (impossibleModeTime - 1) && lighthouseMoveCounter < 3) {
+		lighthouse.moveTo(glm::vec3(6, -3.7, 6), 0.01);
+		lighthouseMoveCounter++;
+	}
+	else if (totalPlayTime > (endOfStormTime + 30 + 3) && lighthouseMoveCounter < 4) {
+		//lighthouse.moveTo(glm::vec3(1.8, -0.4, 2.7), 15);
+		lighthouse.moveTo(glm::vec3(2, -0.4, 2), 30);
+		lighthouseMoveCounter++;
+	}
+	*/
 
 	//storminess
 	if (totalPlayTime < startOfStormTime - 5) {
@@ -595,11 +621,13 @@ void update(float dt) {
 	rain.update(dt);
 	rain.draw();
 
+	splashes.update(dt);
+	splashes.draw();
 
-	if (boat.hasBoatSunk && !smoke.isPaused) {
+	if ((boat.hasBoatSunk || boat.stunned()) && !smoke.isPaused) {
 		smoke.pause();
 	}
-	else if (smoke.isPaused && !boat.hasBoatSunk) {
+	else if (smoke.isPaused && !(boat.hasBoatSunk || boat.stunned())) {
 		smoke.unpause();
 	}
 
@@ -638,6 +666,7 @@ void on_quit() {
 	Sailor::DestroyGeometry();
 	rain.cleanup();
 	smoke.cleanup();
+	splashes.cleanup();
 	//destroy the ocean model???
 }
 
@@ -648,6 +677,11 @@ void OnKeyDown(SDL_KeyboardEvent* key) {
 	/*
 	if (keyname == "Space") {
 		lightningTimer = 0;
+	}
+	*/
+	/*
+	if (keyname == "Space") {
+		splashes.splash(glm::vec3(0,0,0));
 	}
 	*/
 
