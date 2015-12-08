@@ -4,6 +4,9 @@
 #include <algorithm> 
 #include <math.h>
 
+extern string boat_vert_source;
+extern string boat_frag_source;
+
 //init static variables (for reasons I still don't fully understand)
 glModelData Boat::model;
 GLint Boat::uniProj;
@@ -231,8 +234,22 @@ void Boat::InitModel() {
 		38, 41, 40,
 	};
 
+	/*
 	Boat::model = buildModel(
 						"boat_vert.glsl", "boat_frag.glsl", 
+						vertices, sizeof(vertices),
+						elements, sizeof(elements),
+						{
+							{"position", 3}, 
+							{"color", 3}, 
+							{"normal", 3}
+						}
+					);
+					*/
+
+	
+	Boat::model = buildModel(
+						boat_vert_source, boat_frag_source, 
 						vertices, sizeof(vertices),
 						elements, sizeof(elements),
 						{

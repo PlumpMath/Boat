@@ -19,7 +19,7 @@ EXE = Boat
 CPP_FILES = $(wildcard *.cpp)
 OBJ_FILES = $(addprefix ../obj/,$(notdir $(CPP_FILES:.cpp=.o)))
 
-all: $(EXE) run
+all: packageshaders $(EXE) run
 
 $(EXE): $(OBJ_FILES)
 	$(CXX) $(LDFLAGS) -o ../bin/$@ $^
@@ -30,6 +30,10 @@ $(EXE): $(OBJ_FILES)
 .PHONY : clean
 clean:
 	rm ../obj/*.o && rm ../bin/$(EXE)
+
+.PHONY : packageshaders
+packageshaders: 
+	python "packageshaders.py"
 
 .PHONY : run
 run: $(EXE)

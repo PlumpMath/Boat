@@ -20,6 +20,9 @@ using std::string;
 #include <vector>
 using std::vector;
 
+//my stuff
+#include "shaders.h" //hack to make sure shader strings are accessible from all classes that use utils
+
 struct glApp {
 	SDL_Window* window;
 	SDL_GLContext context;
@@ -71,5 +74,6 @@ glMeshData setMesh(GLuint vertices[], int vertCount);
 void destroyMesh(glMeshData mesh);
 
 glModelData buildModel(const char* vertexShaderPath, const char* fragmentShaderPath, GLfloat vertices[], int vertCount, GLuint elements[], int elemCount, vector<glAttribF> attribArray);
+glModelData buildModel(string vertexShaderStr, string fragmentShaderStr, GLfloat vertices[], int vertCount, GLuint elements[], int elemCount, vector<glAttribF> attribArray);
 void destroyModel(glModelData model);
 void drawModel(glModelData model);

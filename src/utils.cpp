@@ -190,6 +190,30 @@ void destroyMesh(glMeshData mesh) {
 	if (mesh.hasElements) glDeleteBuffers(1, &(mesh.ebo));
 }
 
+//some needless duplication here :(
+glModelData buildModel(string vertexShaderStr, string fragmentShaderStr, GLfloat vertices[], int vertCount, GLuint elements[], int elemCount, vector<glAttribF> attribArray) {
+	GLuint vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+	std::cout << "VAO " << vao << std::endl;
+
+	glModelData model = {
+		vao,
+		constructShaderProgram(vertexShaderStr, fragmentShaderStr),
+		setMesh(vertices, vertCount, elements, elemCount),
+		elemCount / 3
+	};
+
+	//should I put this in the shader wrapper too?
+	glUseProgram(model.shader.program);
+
+	initAttribs(attribArray, model.shader.program);
+
+	glBindVertexArray(0);
+
+	return model;
+}
+
 glModelData buildModel(const char* vertexShaderPath, const char* fragmentShaderPath, GLfloat vertices[], int vertCount, GLuint elements[], int elemCount, vector<glAttribF> attribArray) {
 	//init and bind Vertex Array Object
 	GLuint vao;

@@ -41,13 +41,14 @@ using std::string;
 
 /*
 TODO:
-- sailors
 - package shaders with .app
-- sound
 - cross platform distribution
 - credits & title
+- sound
 - make flag hit into camera on its way out
-- jumping fish
+- make sailors come back?
+- improve boat colors?
+- jumping fish?
 
 SAILOR TODO:
 - sailors come back after the big wave
@@ -349,10 +350,12 @@ void ready() {
 	flag.setRotYGoal(0);
 
 	//debug
+	/*
 	for (int i = 0; i < 3; i++) {
 		Sailor s;
 		sailors.push_back(s);
 	}
+	*/
 }
 
 void dramaUpdate(float dt) {
